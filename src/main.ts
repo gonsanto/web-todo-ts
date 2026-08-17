@@ -5,11 +5,11 @@ const button = document.querySelector<HTMLButtonElement>('#add-todo-button')
 const todoList = document.querySelector<HTMLUListElement>('#todo-list')
 const errorMessage = document.querySelector<HTMLParagraphElement>('#todo-error')
 
-if (!input || !button) {
+if (!input || !button || !todoList || !errorMessage) {
   throw new Error('One of the input values are null')
 }
 
-function check() {
+function addNewElement() {
   if (!input || !todoList || !errorMessage) {
     throw new Error('One of the input values are null')
   }
@@ -37,4 +37,4 @@ input.addEventListener('keydown', (e: KeyboardEvent) => {
     check()
   }
 })
-button.addEventListener('click', check)
+button.addEventListener('click', addNewElement)

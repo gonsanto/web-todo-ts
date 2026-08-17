@@ -11,15 +11,15 @@ body {
 }
 
 h1 {
-  margin-top: 20px;
+  margin-top: 1.5rem;
 }
 
 p {
-  margin-bottom: 20px;
+  margin-bottom: 1rem;
 }
 
 div {
-  padding: 25px;
+  padding: 2rem;
 }
 
 ul {
@@ -29,8 +29,8 @@ ul {
   overflow-y: auto;
   background-color: white;
   border-radius: 10px;
-  height: 500px;
-  gap: 15px;
+  height: 30rem;
+  gap: 2rem;
 }
 
 input {
@@ -38,7 +38,7 @@ input {
 }
 
 button {
-  width: 40px;
+  width: 4rem;
 }
 
 main {
@@ -54,11 +54,10 @@ main {
   display: flex;
   flex-direction: column;
   background: whitesmoke;
-  border-radius: 20px;
-  width: 500px;
-  min-height: 500px;
-  max-height: 1000px;
-  box-shadow: 0px 8px 20px 5px rgba(0, 0, 0, 0.08);
+  border-radius: 1rem;
+  width: 40rem;
+  max-height: 50rem;
+  box-shadow: 0rem 1rem 5rem 1rem rgba(0, 0, 0, 0.08);
 }
 
 li {
@@ -73,6 +72,6 @@ li {
 }
 
 .input--error {
-  border: 2px solid #e53e3e;
+  border: 0.2rem solid #e53e3e;
   outline: none;
 }
