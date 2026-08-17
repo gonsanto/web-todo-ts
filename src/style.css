@@ -68,6 +68,10 @@ li {
   padding: 10px;
 }
 
+#todo-error {
+  color: #e53e3e;
+}
+
 .input--error {
   border: 2px solid #e53e3e;
   outline: none;

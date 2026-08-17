@@ -1,38 +1,36 @@
-import './style.css';
+import './style.css'
 
-const input = document.getElementById("todo-input") as HTMLInputElement;
-const button = document.getElementById("add-todo-button") as HTMLButtonElement;
-const todoList = document.getElementById("todo-list") as HTMLUListElement;
-const errorMessage = document.getElementById("todo-error") as HTMLParagraphElement;
-
+const input = document.querySelector<HTMLInputElement>("#todo-input");
+const button = document.querySelector("#add-todo-button");
+const todoList = document.querySelector("#todo-list");
+const errorMessage = document.querySelector("#todo-error");
 const listTodo: string[] = [];
 
-function check(): void {
-  if (!input || !todoList || !errorMessage) return;
+function check() {
+  if (!input || !todoList || !errorMessage) {
+    console.error("One of the input values are null"); return;
+  }
   errorMessage.textContent = "";
   input.classList.remove("input--error");
 
-  if (input.value.trim() === "") {
-    errorMessage.textContent = "The input should not be empty !";
+  const inputValue = input.value;
+
+  if (inputValue.trim() === "") {
     input.classList.add("input--error");
-    errorMessage.style.color = "rgba(255, 0, 0, 0.7)";
+    errorMessage.textContent = "The input should not be empty !";
     input.blur();
   } else {
-    listTodo.push(input.value.trim());
+    const todoElements = document.createElement("li");
+    todoElements.id = "todo-elements"
 
-    todoList.innerHTML = ` 
-      ${listTodo.map((el: string): string => `<li id="todo-elements">${el}</li>`).join("")}
-    `;
-
+    todoElements.textContent = inputValue;
+    todoList.appendChild(todoElements);
     input.value = "";
-    input.focus();
   }
 }
 
 input.addEventListener("keydown", (e: KeyboardEvent): void => {
-  if (e.key === "Enter") {
-    check();
-  }
+  if (e.key === "Enter") { check(); }
 });
 
 button.addEventListener("click", check);
