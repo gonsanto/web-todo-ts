@@ -1,14 +1,17 @@
 import './style.css'
 
 const input = document.querySelector<HTMLInputElement>("#todo-input");
-const button = document.querySelector("#add-todo-button");
-const todoList = document.querySelector("#todo-list");
-const errorMessage = document.querySelector("#todo-error");
-const listTodo: string[] = [];
+const button = document.querySelector<HTMLButtonElement>("#add-todo-button");
+const todoList = document.querySelector<HTMLUListElement>("#todo-list");
+const errorMessage = document.querySelector<HTMLParagraphElement>("#todo-error");
+
+if (!input || !button) {
+  throw new Error("One of the input values are null")
+}
 
 function check() {
   if (!input || !todoList || !errorMessage) {
-    console.error("One of the input values are null"); return;
+    throw new Error("One of the input values are null")
   }
   errorMessage.textContent = "";
   input.classList.remove("input--error");
@@ -29,8 +32,5 @@ function check() {
   }
 }
 
-input.addEventListener("keydown", (e: KeyboardEvent): void => {
-  if (e.key === "Enter") { check(); }
-});
-
+input.addEventListener("keydown", (e: KeyboardEvent): void => { if (e.key === "Enter") { check(); } });
 button.addEventListener("click", check);
