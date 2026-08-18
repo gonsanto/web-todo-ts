@@ -1,18 +1,13 @@
 import './style.css'
 
-const input = document.querySelector<HTMLInputElement>('#todo-input')
-const button = document.querySelector<HTMLButtonElement>('#add-todo-button')
-const todoList = document.querySelector<HTMLUListElement>('#todo-list')
-const errorMessage = document.querySelector<HTMLParagraphElement>('#todo-error')
-
-if (!input || !button || !todoList || !errorMessage) {
-  throw new Error('One of the input values are null')
-}
+const input = document.querySelector('#todo-input') as HTMLInputElement
+const button = document.querySelector('#add-todo-button') as HTMLButtonElement
+const todoList = document.querySelector('#todo-list') as HTMLUListElement
+const errorMessage = document.querySelector(
+  '#todo-error',
+) as HTMLParagraphElement
 
 function addNewElement() {
-  if (!input || !todoList || !errorMessage) {
-    throw new Error('One of the input values are null')
-  }
   errorMessage.textContent = ''
   input.classList.remove('input--error')
 
@@ -24,8 +19,8 @@ function addNewElement() {
     input.blur()
   } else {
     const todoElements = document.createElement('li')
-    todoElements.id = 'todo-elements'
 
+    todoElements.id = 'todo-elements'
     todoElements.textContent = inputValue
     todoList.appendChild(todoElements)
     input.value = ''
@@ -34,7 +29,7 @@ function addNewElement() {
 
 input.addEventListener('keydown', (e: KeyboardEvent) => {
   if (e.key === 'Enter') {
-    check()
+    addNewElement()
   }
 })
 button.addEventListener('click', addNewElement)
