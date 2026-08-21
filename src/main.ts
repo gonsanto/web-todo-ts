@@ -2,7 +2,7 @@ import './style.css'
 import { elements } from './dom.ts'
 
 const { input, button, todoList, errorMessage } = elements
-let todoEl = 0;
+let todoEl = 0
 
 function addNewElement() {
   errorMessage.textContent = ''
@@ -12,7 +12,7 @@ function addNewElement() {
   if (!(inputValue.trim() === '')) {
     const todoElements = document.createElement('li')
 
-    todoEl++;
+    todoEl++
     todoElements.id = `todo-elements-${todoEl}`
 
     todoElements.textContent = inputValue
@@ -26,5 +26,9 @@ function addNewElement() {
   }
 }
 
-input.addEventListener('keydown', (e: KeyboardEvent) => { if (e.key === 'Enter') { addNewElement() } })
+input.addEventListener('keydown', (e: KeyboardEvent) => {
+  if (e.key === 'Enter') {
+    addNewElement()
+  }
+})
 button.addEventListener('click', addNewElement)
