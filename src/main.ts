@@ -2,16 +2,29 @@ import './style.css'
 import { elements } from './dom.ts'
 
 const { input, button, todoList, errorMessage } = elements
-let todoEl = 0
-// localStorage.removeItem("todos")
+
+//  localStorage.removeItem("todos")
 
 type Todo = {
   id: number
   text: string
 }
 
-const todos: Todo[] = JSON.parse(localStorage.getItem('todos') ?? '[]')
-if (!(todos === null)) {
+function getStoredTodos(): Todo[] {
+  const rawData = localStorage.getItem('todos') ?? '[]'
+  let parsedData: unknown
+
+  try {
+    parsedData = JSON.parse(rawData)
+    return Array.isArray(parsedData) ? parsedData : []
+  } catch {
+    return []
+  }
+}
+const todos: Todo[] = getStoredTodos()
+const todoEl = todos.length
+
+function renderTodos() {
   todoList.innerHTML = ''
   todos.forEach((Todo) => {
     addTask(Todo)
@@ -38,9 +51,7 @@ function addNewElement() {
     todos.push(newTodo)
     localStorage.setItem('todos', JSON.stringify(todos))
 
-    todoEl++
     addTask(newTodo)
-
     //  console.log(JSON.stringify(todos))
   } else {
     input.classList.add('input--error')
@@ -49,6 +60,8 @@ function addNewElement() {
   }
   input.value = ''
 }
+
+renderTodos()
 
 input.addEventListener('keydown', (e: KeyboardEvent) => {
   if (e.key === 'Enter') {
