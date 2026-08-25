@@ -16,7 +16,15 @@ function getStoredTodos(): Todo[] {
 
   try {
     parsedData = JSON.parse(rawData)
-    return Array.isArray(parsedData) ? parsedData : []
+    return Array.isArray(parsedData)
+      ? parsedData.filter(
+          (todo): todo is Todo =>
+            typeof todo === 'object' &&
+            todo !== null &&
+            typeof todo.id === 'number' &&
+            typeof todo.text === 'string',
+        )
+      : []
   } catch {
     return []
   }
@@ -60,7 +68,6 @@ function addNewElement() {
   }
   input.value = ''
 }
-
 renderTodos()
 
 input.addEventListener('keydown', (e: KeyboardEvent) => {
