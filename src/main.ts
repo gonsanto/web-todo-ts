@@ -8,7 +8,7 @@ const { input, button, todoList, errorMessage } = elements
 type Todo = {
   id: number
   text: string
-  isCompleted: boolean
+  isDone: boolean
 }
 
 function getStoredTodos(): Todo[] {
@@ -19,13 +19,13 @@ function getStoredTodos(): Todo[] {
     parsedData = JSON.parse(rawData)
     return Array.isArray(parsedData)
       ? parsedData.filter(
-        (todo) =>
-          typeof todo === 'object' &&
-          todo !== null &&
-          typeof todo.id === 'number' &&
-          typeof todo.text === 'string' &&
-          typeof todo.isCompleted === 'boolean',
-      )
+          (todo) =>
+            typeof todo === 'object' &&
+            todo !== null &&
+            typeof todo.id === 'number' &&
+            typeof todo.text === 'string' &&
+            typeof todo.isDone === 'boolean',
+        )
       : []
   } catch {
     return []
@@ -45,13 +45,13 @@ function addTask(el: Todo) {
   todoElements.id = `todo-elements-${el.id}`
 
   const checkbox = document.createElement('input')
-  Object.assign(checkbox, { type: 'checkbox', checked: el.isCompleted })
+  Object.assign(checkbox, { type: 'checkbox', checked: el.isDone })
 
   const textSpan = document.createElement('span')
   textSpan.textContent = el.text
 
   checkbox.addEventListener('change', () => {
-    el.isCompleted = checkbox.checked
+    el.isDone = checkbox.checked
     localStorage.setItem('todos', JSON.stringify(todos))
     // console.log(JSON.stringify(el))
   })
@@ -70,7 +70,7 @@ function addNewElement() {
     const newTodo = {
       id: todos.length,
       text: inputValue,
-      isCompleted: false,
+      isDone: false,
     }
     todos.push(newTodo)
     localStorage.setItem('todos', JSON.stringify(todos))
