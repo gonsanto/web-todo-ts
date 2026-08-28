@@ -30,7 +30,7 @@ ul {
   background-color: white;
   border-radius: 10px;
   height: 30rem;
-  gap: 2rem;
+  gap: 1rem;
 }
 
 input {
@@ -62,9 +62,14 @@ main {
 
 li {
   display: flex;
-  background: white;
-  box-shadow: 0px 8px 20px 5px rgba(0, 0, 0, 0.08);
-  padding: 10px;
+  padding: 1rem;
+  gap: 2rem;
+}
+
+#todo-list li {
+  background-color: #f9f9f9;
+  border: 0.0625rem solid #ddd;
+  border-radius: 0.375rem;
 }
 
 #todo-error {
@@ -74,4 +79,8 @@ li {
 .input--error {
   border: 0.2rem solid #e53e3e;
   outline: none;
+}
+
+li input {
+  width: 1.5rem;
 }
