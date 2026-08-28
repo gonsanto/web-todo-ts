@@ -11,6 +11,8 @@ type Todo = {
   isDone: boolean
 }
 
+let isStorageSafe = true
+
 function getStoredTodos(): Todo[] {
   try {
     const rawData = localStorage.getItem('todos') ?? '[]'
@@ -27,9 +29,11 @@ function getStoredTodos(): Todo[] {
         )
       : []
   } catch {
+    isStorageSafe = false
     return []
   }
 }
+
 const todos: Todo[] = getStoredTodos()
 
 function renderTodos() {
@@ -40,6 +44,12 @@ function renderTodos() {
 }
 
 function saveTodos(): boolean {
+  if (!isStorageSafe) {
+    console.warn(
+      'Storage read failed. To prevent data loss writing is disabled',
+    )
+    return false
+  }
   try {
     localStorage.setItem('todos', JSON.stringify(todos))
     return true
