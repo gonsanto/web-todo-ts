@@ -18,13 +18,13 @@ function getStoredTodos(): Todo[] {
 
     return Array.isArray(parsedData)
       ? parsedData.filter(
-        (todo): todo is Todo =>
-          typeof todo === 'object' &&
-          todo !== null &&
-          typeof todo.id === 'number' &&
-          typeof todo.text === 'string' &&
-          typeof todo.isDone === 'boolean',
-      )
+          (todo): todo is Todo =>
+            typeof todo === 'object' &&
+            todo !== null &&
+            typeof todo.id === 'number' &&
+            typeof todo.text === 'string' &&
+            typeof todo.isDone === 'boolean',
+        )
       : []
   } catch {
     return []
@@ -96,7 +96,7 @@ function addNewElement() {
       renderTodos()
     } else {
       todos.pop()
-      errorMessage.textContent = 'Storage is full! Could not save new task.';
+      errorMessage.textContent = 'Storage is full! Could not save new task.'
     }
   } else {
     input.classList.add('input--error')
