@@ -18,13 +18,13 @@ function getStoredTodos(): Todo[] {
 
     return Array.isArray(parsedData)
       ? parsedData.filter(
-          (todo): todo is Todo =>
-            typeof todo === 'object' &&
-            todo !== null &&
-            typeof todo.id === 'number' &&
-            typeof todo.text === 'string' &&
-            typeof todo.isDone === 'boolean',
-        )
+        (todo): todo is Todo =>
+          typeof todo === 'object' &&
+          todo !== null &&
+          typeof todo.id === 'number' &&
+          typeof todo.text === 'string' &&
+          typeof todo.isDone === 'boolean',
+      )
       : []
   } catch {
     return []
@@ -39,11 +39,13 @@ function renderTodos() {
   })
 }
 
-function saveTodos() {
+function saveTodos(): boolean {
   try {
     localStorage.setItem('todos', JSON.stringify(todos))
+    return true
   } catch {
-    throw new Error('Storage data exceeded or unavailable')
+    console.warn('Storage data exceeded or unavailable')
+    return false
   }
 }
 
@@ -58,8 +60,16 @@ function addTask(el: Todo) {
   textSpan.textContent = el.text
 
   checkbox.addEventListener('change', () => {
+    const previousState = el.isDone
     el.isDone = checkbox.checked
-    saveTodos()
+
+    const savedData = saveTodos()
+
+    if (!savedData) {
+      el.isDone = previousState
+      checkbox.checked = previousState
+      alert('Storage is full or unavailable! Changes could not be saved.')
+    }
     // console.log(JSON.stringify(el))
   })
 
@@ -80,9 +90,14 @@ function addNewElement() {
       isDone: false,
     }
     todos.push(newTodo)
-    saveTodos()
+    const savedData = saveTodos()
 
-    renderTodos()
+    if (savedData) {
+      renderTodos()
+    } else {
+      todos.pop()
+      errorMessage.textContent = 'Storage is full! Could not save new task.';
+    }
   } else {
     input.classList.add('input--error')
     errorMessage.textContent = 'The input should not be empty !'
