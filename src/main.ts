@@ -12,14 +12,13 @@ type Todo = {
 }
 
 function getStoredTodos(): Todo[] {
-  const rawData = localStorage.getItem('todos') ?? '[]'
-  let parsedData: unknown
-
   try {
-    parsedData = JSON.parse(rawData)
+    const rawData = localStorage.getItem('todos') ?? '[]'
+    const parsedData: unknown = JSON.parse(rawData)
+
     return Array.isArray(parsedData)
       ? parsedData.filter(
-          (todo) =>
+          (todo): todo is Todo =>
             typeof todo === 'object' &&
             todo !== null &&
             typeof todo.id === 'number' &&
@@ -40,6 +39,14 @@ function renderTodos() {
   })
 }
 
+function saveTodos() {
+  try {
+    localStorage.setItem('todos', JSON.stringify(todos))
+  } catch {
+    throw new Error('Storage data exceeded or unavailable')
+  }
+}
+
 function addTask(el: Todo) {
   const todoElements = document.createElement('li')
   todoElements.id = `todo-elements-${el.id}`
@@ -52,7 +59,7 @@ function addTask(el: Todo) {
 
   checkbox.addEventListener('change', () => {
     el.isDone = checkbox.checked
-    localStorage.setItem('todos', JSON.stringify(todos))
+    saveTodos()
     // console.log(JSON.stringify(el))
   })
 
@@ -73,10 +80,9 @@ function addNewElement() {
       isDone: false,
     }
     todos.push(newTodo)
-    localStorage.setItem('todos', JSON.stringify(todos))
+    saveTodos()
 
-    addTask(newTodo)
-    console.log(JSON.stringify(todos))
+    renderTodos()
   } else {
     input.classList.add('input--error')
     errorMessage.textContent = 'The input should not be empty !'
