@@ -20,13 +20,13 @@ function getStoredTodos(): Todo[] {
 
     return Array.isArray(parsedData)
       ? parsedData.filter(
-        (todo): todo is Todo =>
-          typeof todo === 'object' &&
-          todo !== null &&
-          typeof todo.id === 'number' &&
-          typeof todo.text === 'string' &&
-          typeof todo.isDone === 'boolean',
-      )
+          (todo): todo is Todo =>
+            typeof todo === 'object' &&
+            todo !== null &&
+            typeof todo.id === 'number' &&
+            typeof todo.text === 'string' &&
+            typeof todo.isDone === 'boolean',
+        )
       : []
   } catch {
     isStorageSafe = false
@@ -45,7 +45,9 @@ function renderTodos() {
 
 function saveTodos(): boolean {
   if (!isStorageSafe) {
-    console.warn('Storage read failed. To prevent data loss writing is disabled')
+    console.warn(
+      'Storage read failed. To prevent data loss writing is disabled',
+    )
     return false
   }
   try {
@@ -82,7 +84,7 @@ function addTask(el: Todo) {
       checkbox.checked = previousState
       alert('Storage is full or unavailable! Changes could not be saved.')
     }
-    console.log(JSON.stringify(el))
+    // console.log(JSON.stringify(el))
   })
   removeButton.addEventListener('click', () => {
     removeElement(el.id)
@@ -101,7 +103,7 @@ function addNewElement() {
   const inputValue = input.value
   if (!(inputValue.trim() === '')) {
     const newTodo = {
-      id: todos.length,
+      id: Date.now(),
       text: inputValue,
       isDone: false,
     }

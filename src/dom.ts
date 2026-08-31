@@ -10,5 +10,5 @@ export const elements = {
   input: checkNull<HTMLInputElement>('#todo-input'),
   addButton: checkNull<HTMLButtonElement>('#add-todo-button'),
   todoList: checkNull<HTMLUListElement>('#todo-list'),
-  errorMessage: checkNull<HTMLParagraphElement>('#todo-error')
+  errorMessage: checkNull<HTMLParagraphElement>('#todo-error'),
 }
