@@ -102,8 +102,10 @@ function addNewElement() {
 
   const inputValue = input.value
   if (!(inputValue.trim() === '')) {
+    const maxId =
+      todos.length > 0 ? Math.max(...todos.map((todo) => todo.id)) : -1
     const newTodo = {
-      id: Date.now(),
+      id: maxId + 1,
       text: inputValue,
       isDone: false,
     }
