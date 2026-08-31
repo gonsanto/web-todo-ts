@@ -1,7 +1,7 @@
 import './style.css'
 import { elements } from './dom.ts'
 
-const { input, button, todoList, errorMessage } = elements
+const { input, addButton, todoList, errorMessage } = elements
 
 // localStorage.removeItem("todos")
 
@@ -69,6 +69,10 @@ function addTask(el: Todo) {
   const textSpan = document.createElement('span')
   textSpan.textContent = el.text
 
+  const removeButton = document.createElement('button')
+  removeButton.textContent = '🗑'
+  removeButton.style.cursor = 'pointer'
+
   checkbox.addEventListener('change', () => {
     const previousState = el.isDone
     el.isDone = checkbox.checked
@@ -82,9 +86,13 @@ function addTask(el: Todo) {
     }
     // console.log(JSON.stringify(el))
   })
+  removeButton.addEventListener('click', () => {
+    removeElement(el.id)
+  })
 
   todoElements.appendChild(checkbox)
   todoElements.appendChild(textSpan)
+  todoElements.appendChild(removeButton)
   todoList.appendChild(todoElements)
 }
 
@@ -94,8 +102,10 @@ function addNewElement() {
 
   const inputValue = input.value
   if (!(inputValue.trim() === '')) {
+    const maxId =
+      todos.length > 0 ? Math.max(...todos.map((todo) => todo.id)) : -1
     const newTodo = {
-      id: todos.length,
+      id: maxId + 1,
       text: inputValue,
       isDone: false,
     }
@@ -115,6 +125,23 @@ function addNewElement() {
   }
   input.value = ''
 }
+
+function removeElement(id: number) {
+  const index = todos.findIndex((todo) => todo.id === id)
+  if (index === -1) return
+
+  const deletedTodo = todos[index]
+  todos.splice(index, 1)
+
+  const savedData = saveTodos()
+
+  if (savedData) {
+    renderTodos()
+  } else {
+    todos.splice(index, 0, deletedTodo)
+    alert('Storage is full or unavailable! Could not remove task.')
+  }
+}
 renderTodos()
 
 input.addEventListener('keydown', (e: KeyboardEvent) => {
@@ -122,4 +149,4 @@ input.addEventListener('keydown', (e: KeyboardEvent) => {
     addNewElement()
   }
 })
-button.addEventListener('click', addNewElement)
+addButton.addEventListener('click', addNewElement)

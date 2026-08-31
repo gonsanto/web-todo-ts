@@ -1,12 +1,8 @@
 html,
-body {
-  padding: 0;
-  margin: 0;
-}
-
 * {
   font-family: Helvetica, Arial, sans-serif;
   text-align: center;
+  padding: 0;
   margin: 0;
 }
 
@@ -41,6 +37,11 @@ button {
   width: 4rem;
 }
 
+#todo-list button {
+  width: fit-content;
+  margin-left: auto;
+}
+
 main {
   position: fixed;
   justify-items: center;
@@ -62,6 +63,7 @@ main {
 
 li {
   display: flex;
+  align-items: center;
   padding: 1rem;
   gap: 2rem;
 }
@@ -82,5 +84,5 @@ li {
 }
 
 li input {
-  width: 1.5rem;
+  width: auto;
 }
