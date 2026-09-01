@@ -14,18 +14,13 @@ p {
   margin-bottom: 1rem;
 }
 
-div {
-  padding: 2rem;
-}
-
 ul {
   display: flex;
   flex-direction: column;
-  padding: 15px;
-  overflow-y: auto;
+  overflow-x: hidden;
   background-color: white;
   border-radius: 10px;
-  height: 30rem;
+  padding: 15px;
   gap: 1rem;
 }
 
@@ -34,7 +29,9 @@ input {
 }
 
 button {
-  width: 4rem;
+  width: fit-content;
+  align-self: center;
+  padding: 0.25rem;
 }
 
 #todo-list button {
@@ -44,8 +41,8 @@ button {
 
 main {
   position: fixed;
-  justify-items: center;
-  place-content: center;
+  overflow-y: scroll;
+  place-items: center;
   background: #f0f2f5;
   height: 100%;
   width: 100%;
@@ -55,9 +52,12 @@ main {
   display: flex;
   flex-direction: column;
   background: whitesmoke;
+  height: fit-content;
+  width: min(50rem);
   border-radius: 1rem;
-  width: 40rem;
-  max-height: 50rem;
+  gap: 1.5rem;
+  margin: 1.5rem;
+  padding: 1rem;
   box-shadow: 0rem 1rem 5rem 1rem rgba(0, 0, 0, 0.08);
 }
 
