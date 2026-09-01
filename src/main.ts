@@ -145,10 +145,10 @@ function removeElement(id: number) {
 
 function clearElements() {
   if (todos.length === 0) return
+  const oldTodos = [...todos]
 
   todos.splice(0, JSON.stringify(todos).length)
 
-  const oldTodos = [...todos]
   const savedData = saveTodos()
 
   if (savedData) {
