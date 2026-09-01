@@ -1,7 +1,7 @@
 import './style.css'
 import { elements } from './dom.ts'
 
-const { input, addButton, todoList, errorMessage } = elements
+const { input, addButton, deleteAllButton, todoList, errorMessage } = elements
 
 // localStorage.removeItem("todos")
 
@@ -142,6 +142,22 @@ function removeElement(id: number) {
     alert('Storage is full or unavailable! Could not remove task.')
   }
 }
+
+function clearElements() {
+  if (todos.length === 0) return
+
+  todos.splice(0, JSON.stringify(todos).length)
+
+  const oldTodos = [...todos]
+  const savedData = saveTodos()
+
+  if (savedData) {
+    renderTodos()
+  } else {
+    todos.push(...oldTodos)
+    alert('Storage is unavailable! Could not clear task.')
+  }
+}
 renderTodos()
 
 input.addEventListener('keydown', (e: KeyboardEvent) => {
@@ -150,3 +166,7 @@ input.addEventListener('keydown', (e: KeyboardEvent) => {
   }
 })
 addButton.addEventListener('click', addNewElement)
+
+deleteAllButton.addEventListener('click', () => {
+  clearElements()
+})
