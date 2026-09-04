@@ -14,8 +14,13 @@
       <h1>Web to-do list app</h1>
       <div>
         <p id="todo-error"></p>
-        <input type="text" id="todo-input" name="input prompt" />
-        <button type="button" id="add-todo-button" name="add button">add</button>
+        <form action="add-new-todo">
+          <div class="input-container">
+            <input type="text" id="todo-input" name="input prompt" />
+            <input type="date" id="todo-date-input" />
+            <button type="button" id="add-todo-button" name="add button">add</button>
+          </div>
+        </form>
       </div>
       <ul id="todo-list" name="list of elements"></ul>
       <button type="reset" id="delete-all">Delete All</button>

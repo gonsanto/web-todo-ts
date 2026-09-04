@@ -12,4 +12,5 @@ export const elements = {
   todoList: checkNull<HTMLUListElement>('#todo-list'),
   errorMessage: checkNull<HTMLParagraphElement>('#todo-error'),
   deleteAllButton: checkNull<HTMLButtonElement>('#delete-all'),
+  dateInput: checkNull<HTMLInputElement>('#todo-date-input'),
 }
