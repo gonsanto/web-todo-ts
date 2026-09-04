@@ -1,7 +1,8 @@
 import './style.css'
 import { elements } from './dom.ts'
 
-const { input, addButton, deleteAllButton, todoList, errorMessage } = elements
+const { input, addButton, deleteAllButton, todoList, errorMessage, dateInput } =
+  elements
 
 // localStorage.removeItem("todos")
 
@@ -9,6 +10,7 @@ type Todo = {
   id: number
   text: string
   isDone: boolean
+  dueDate: string
 }
 
 let isStorageSafe = true
@@ -25,7 +27,8 @@ function getStoredTodos(): Todo[] {
             todo !== null &&
             typeof todo.id === 'number' &&
             typeof todo.text === 'string' &&
-            typeof todo.isDone === 'boolean',
+            typeof todo.isDone === 'boolean' &&
+            typeof todo.dueDate === 'string',
         )
       : []
   } catch {
@@ -73,6 +76,8 @@ function addTask(el: Todo) {
   removeButton.textContent = '🗑'
   removeButton.style.cursor = 'pointer'
 
+  const dateEl = createDateElement(el)
+
   checkbox.addEventListener('change', () => {
     const previousState = el.isDone
     el.isDone = checkbox.checked
@@ -92,38 +97,72 @@ function addTask(el: Todo) {
 
   todoElements.appendChild(checkbox)
   todoElements.appendChild(textSpan)
+  if (dateEl) {
+    todoElements.appendChild(dateEl)
+  }
   todoElements.appendChild(removeButton)
   todoList.appendChild(todoElements)
+}
+
+function createDateElement(el: Todo) {
+  if (!el.dueDate) {
+    const noDueDate = document.createElement('p')
+    noDueDate.textContent = 'no due date'
+    return noDueDate
+  }
+
+  const timeEl = document.createElement('time')
+  timeEl.textContent = el.dueDate
+
+  return timeEl
 }
 
 function addNewElement() {
   errorMessage.textContent = ''
   input.classList.remove('input--error')
+  dateInput.classList.remove('input--error')
 
   const inputValue = input.value
-  if (!(inputValue.trim() === '')) {
-    const maxId =
-      todos.length > 0 ? Math.max(...todos.map((todo) => todo.id)) : -1
-    const newTodo = {
-      id: maxId + 1,
-      text: inputValue,
-      isDone: false,
-    }
-    todos.push(newTodo)
-    const savedData = saveTodos()
+  const dueDateValue = dateInput.value
 
-    if (savedData) {
-      renderTodos()
-    } else {
-      todos.pop()
-      errorMessage.textContent = 'Storage is full! Could not save new task.'
-    }
-  } else {
+  if (inputValue.trim() === '') {
     input.classList.add('input--error')
+    dateInput.classList.add('input--error')
     errorMessage.textContent = 'The input should not be empty !'
     input.blur()
+    return
+  }
+
+  if (dueDateValue) {
+    const dateNow = new Date().toLocaleDateString('en-CA')
+    if (dueDateValue < dateNow) {
+      dateInput.classList.add('input--error')
+      input.classList.add('input--error')
+      errorMessage.textContent = 'Due date cannot be in the past !'
+      return
+    }
+  }
+
+  const maxId =
+    todos.length > 0 ? Math.max(...todos.map((todo) => todo.id)) : -1
+  const newTodo = {
+    id: maxId + 1,
+    text: inputValue,
+    isDone: false,
+    dueDate: dueDateValue,
+  }
+  todos.push(newTodo)
+  const savedData = saveTodos()
+
+  if (savedData) {
+    renderTodos()
+  } else {
+    todos.pop()
+    errorMessage.textContent = 'Storage is full! Could not save new task.'
   }
   input.value = ''
+  dateInput.value = ''
+  console.log(JSON.stringify(todos))
 }
 
 function removeElement(id: number) {
