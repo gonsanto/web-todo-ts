@@ -4,8 +4,6 @@ import { elements } from './dom.ts'
 const { input, addButton, deleteAllButton, todoList, errorMessage, dateInput } =
   elements
 
-// localStorage.removeItem("todos")
-
 type Todo = {
   id: number
   text: string
@@ -20,17 +18,7 @@ function getStoredTodos(): Todo[] {
     const rawData = localStorage.getItem('todos') ?? '[]'
     const parsedData: unknown = JSON.parse(rawData)
 
-    return Array.isArray(parsedData)
-      ? parsedData.filter(
-          (todo): todo is Todo =>
-            typeof todo === 'object' &&
-            todo !== null &&
-            typeof todo.id === 'number' &&
-            typeof todo.text === 'string' &&
-            typeof todo.isDone === 'boolean' &&
-            typeof todo.dueDate === 'string',
-        )
-      : []
+    return Array.isArray(parsedData) ? (parsedData as Todo[]) : []
   } catch {
     isStorageSafe = false
     return []
@@ -46,7 +34,7 @@ function renderTodos() {
   })
 }
 
-function saveTodos(): boolean {
+function isSaveTodo(): boolean {
   if (!isStorageSafe) {
     console.warn(
       'Storage read failed. To prevent data loss writing is disabled',
@@ -82,7 +70,7 @@ function addTask(el: Todo) {
     const previousState = el.isDone
     el.isDone = checkbox.checked
 
-    const savedData = saveTodos()
+    const savedData = isSaveTodo()
 
     if (!savedData) {
       el.isDone = previousState
@@ -143,16 +131,16 @@ function addNewElement() {
     }
   }
 
-  const maxId =
+  const lastId: number =
     todos.length > 0 ? Math.max(...todos.map((todo) => todo.id)) : -1
   const newTodo = {
-    id: maxId + 1,
+    id: lastId + 1,
     text: inputValue,
     isDone: false,
     dueDate: dueDateValue,
   }
   todos.push(newTodo)
-  const savedData = saveTodos()
+  const savedData = isSaveTodo()
 
   if (savedData) {
     renderTodos()
@@ -162,7 +150,7 @@ function addNewElement() {
   }
   input.value = ''
   dateInput.value = ''
-  console.log(JSON.stringify(todos))
+  // console.log(JSON.stringify(todos))
 }
 
 function removeElement(id: number) {
@@ -172,7 +160,7 @@ function removeElement(id: number) {
   const deletedTodo = todos[index]
   todos.splice(index, 1)
 
-  const savedData = saveTodos()
+  const savedData = isSaveTodo()
 
   if (savedData) {
     renderTodos()
@@ -186,9 +174,9 @@ function clearElements() {
   if (todos.length === 0) return
   const oldTodos = [...todos]
 
-  todos.splice(0, JSON.stringify(todos).length)
+  todos.splice(0, todos.length)
 
-  const savedData = saveTodos()
+  const savedData = isSaveTodo()
 
   if (savedData) {
     renderTodos()

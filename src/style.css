@@ -31,11 +31,6 @@ button {
   padding: 0.25rem;
 }
 
-#todo-list button {
-  width: fit-content;
-  margin-left: ;
-}
-
 main {
   position: fixed;
   overflow-y: scroll;
@@ -104,14 +99,14 @@ li input {
   display: none;
 }
 
+li time,
 li p {
   font-size: 0.8rem;
   color: gray;
   margin-left: auto;
 }
 
-li time {
-  font-size: 0.8rem;
-  color: gray;
-  margin-left: auto;
+li span {
+  word-break: break-word;
+  text-align: left;
 }
