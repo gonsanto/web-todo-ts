@@ -63,6 +63,7 @@ function isSaveTodo(): boolean {
 function addTask(el: Todo) {
   const todoElements = document.createElement('li')
   todoElements.id = `todo-elements-${el.id}`
+  todoElements.classList.add(getDueDateStatus(el.dueDate))
 
   const checkbox = document.createElement('input')
   Object.assign(checkbox, { type: 'checkbox', checked: el.isDone })
@@ -87,7 +88,6 @@ function addTask(el: Todo) {
       checkbox.checked = previousState
       alert('Storage is full or unavailable! Changes could not be saved.')
     }
-    // console.log(JSON.stringify(el))
   })
   removeButton.addEventListener('click', () => {
     removeElement(el.id)
@@ -132,7 +132,7 @@ function addNewElement() {
   }
 
   if (dueDateValue) {
-    const dateNow = new Date().toLocaleDateString('en-CA')
+    const dateNow = getCurrentDate()
     if (dueDateValue < dateNow) {
       dateInput.classList.add('input--error')
       input.classList.add('input--error')
@@ -160,7 +160,6 @@ function addNewElement() {
   }
   input.value = ''
   dateInput.value = ''
-  // console.log(JSON.stringify(todos))
 }
 
 function removeElement(id: number) {
@@ -195,6 +194,48 @@ function clearElements() {
     alert('Storage is unavailable! Could not clear task.')
   }
 }
+
+function getCurrentDate(): string {
+  return new Date().toLocaleDateString('en-CA')
+}
+
+function getDueDateStatus(el: string) {
+  if (!el) {
+    return 'no-due-date'
+  }
+
+  const dateNow = getCurrentDate()
+  let dueDate: string
+
+  if (el === dateNow) {
+    dueDate = 'today'
+  } else if (el < dateNow) {
+    dueDate = 'overdue'
+  } else {
+    const dueDateObj = new Date(el)
+    const todayObj = new Date(dateNow)
+    const milisecondsToDay = 1000 * 60 * 60 * 24
+
+    const diffTime = dueDateObj.getTime() - todayObj.getTime()
+    const diffDays = Math.round(diffTime / milisecondsToDay)
+
+    if (diffDays >= 1 && diffDays <= 4) {
+      dueDate = 'soon'
+    } else {
+      dueDate = 'later'
+    }
+  }
+  return `due-date--${dueDate}`
+}
+
+let lastKnownDate = getCurrentDate()
+window.addEventListener('focus', () => {
+  const currentDate = getCurrentDate()
+  if (currentDate !== lastKnownDate) {
+    lastKnownDate = currentDate
+    renderTodos()
+  }
+})
 renderTodos()
 
 input.addEventListener('keydown', (e: KeyboardEvent) => {
