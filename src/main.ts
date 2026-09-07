@@ -18,7 +18,17 @@ function getStoredTodos(): Todo[] {
     const rawData = localStorage.getItem('todos') ?? '[]'
     const parsedData: unknown = JSON.parse(rawData)
 
-    return Array.isArray(parsedData) ? (parsedData as Todo[]) : []
+    return Array.isArray(parsedData)
+      ? parsedData.filter(
+          (todo): todo is Todo =>
+            typeof todo === 'object' &&
+            todo !== null &&
+            typeof todo.id === 'number' &&
+            typeof todo.text === 'string' &&
+            typeof todo.isDone === 'boolean' &&
+            typeof todo.dueDate === 'string',
+        )
+      : []
   } catch {
     isStorageSafe = false
     return []
