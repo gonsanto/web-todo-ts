@@ -10,10 +10,6 @@ h1 {
   margin-top: 1.5rem;
 }
 
-p {
-  margin-bottom: 1rem;
-}
-
 ul {
   display: flex;
   flex-direction: column;
@@ -25,6 +21,7 @@ ul {
 }
 
 input {
+  height: 1.5rem;
   width: 50%;
 }
 
@@ -32,11 +29,6 @@ button {
   width: fit-content;
   align-self: center;
   padding: 0.25rem;
-}
-
-#todo-list button {
-  width: fit-content;
-  margin-left: auto;
 }
 
 main {
@@ -85,4 +77,36 @@ li {
 
 li input {
   width: auto;
+}
+
+.input-container {
+  display: flex;
+  justify-content: center;
+}
+
+#todo-input {
+  border-right: none;
+  margin-left: 3rem;
+}
+
+#todo-date-input {
+  width: fit-content;
+  border-left: none;
+  margin-right: 1rem;
+}
+
+#todo-date-input::-webkit-datetime-edit {
+  display: none;
+}
+
+li time,
+li p {
+  font-size: 0.8rem;
+  color: gray;
+  margin-left: auto;
+}
+
+li span {
+  word-break: break-word;
+  text-align: left;
 }
