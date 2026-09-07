@@ -20,14 +20,14 @@ function getStoredTodos(): Todo[] {
 
     return Array.isArray(parsedData)
       ? parsedData.filter(
-          (todo): todo is Todo =>
-            typeof todo === 'object' &&
-            todo !== null &&
-            typeof todo.id === 'number' &&
-            typeof todo.text === 'string' &&
-            typeof todo.isDone === 'boolean' &&
-            typeof todo.dueDate === 'string',
-        )
+        (todo): todo is Todo =>
+          typeof todo === 'object' &&
+          todo !== null &&
+          typeof todo.id === 'number' &&
+          typeof todo.text === 'string' &&
+          typeof todo.isDone === 'boolean' &&
+          typeof todo.dueDate === 'string',
+      )
       : []
   } catch {
     isStorageSafe = false
@@ -63,6 +63,7 @@ function isSaveTodo(): boolean {
 function addTask(el: Todo) {
   const todoElements = document.createElement('li')
   todoElements.id = `todo-elements-${el.id}`
+  todoElements.classList.add(getDueDateStatus(el.dueDate))
 
   const checkbox = document.createElement('input')
   Object.assign(checkbox, { type: 'checkbox', checked: el.isDone })
@@ -87,7 +88,6 @@ function addTask(el: Todo) {
       checkbox.checked = previousState
       alert('Storage is full or unavailable! Changes could not be saved.')
     }
-    // console.log(JSON.stringify(el))
   })
   removeButton.addEventListener('click', () => {
     removeElement(el.id)
@@ -160,7 +160,6 @@ function addNewElement() {
   }
   input.value = ''
   dateInput.value = ''
-  // console.log(JSON.stringify(todos))
 }
 
 function removeElement(id: number) {
@@ -195,7 +194,41 @@ function clearElements() {
     alert('Storage is unavailable! Could not clear task.')
   }
 }
+
+function getCurrentDate(): string {
+  return new Date().toISOString().slice(0, 10)
+}
+
+function getDueDateStatus(el: string) {
+  if (!el) {
+    return 'no-due-date'
+  }
+
+  const dateNow = getCurrentDate()
+  let dueDate: string
+
+  if (el === dateNow) {
+    dueDate = 'today'
+  } else if (el < dateNow) {
+    dueDate = 'overdue'
+  } else {
+    const dueDateObj = new Date(el)
+    const todayObj = new Date(dateNow)
+    const milisecondsToDay = 1000 * 60 * 60 * 24
+
+    const diffTime = dueDateObj.getTime() - todayObj.getTime()
+    const diffDays = Math.round(diffTime / milisecondsToDay)
+
+    if (diffDays >= 1 && diffDays <= 4) {
+      dueDate = 'soon'
+    } else {
+      dueDate = 'later'
+    }
+  }
+  return `due-date--${dueDate}`
+}
 renderTodos()
+console.log(getCurrentDate())
 
 input.addEventListener('keydown', (e: KeyboardEvent) => {
   if (e.key === 'Enter') {

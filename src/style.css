@@ -60,12 +60,6 @@ li {
   gap: 2rem;
 }
 
-#todo-list li {
-  background-color: #f9f9f9;
-  border: 0.0625rem solid #ddd;
-  border-radius: 0.375rem;
-}
-
 #todo-error {
   color: #e53e3e;
 }
@@ -109,4 +103,29 @@ li p {
 li span {
   word-break: break-word;
   text-align: left;
+}
+
+#todo-list li {
+  border: 0.0625rem solid #ddd;
+  border-radius: 0.375rem;
+}
+
+.due-date--today {
+  background-color: rgb(255, 188, 63, 0.5);
+}
+
+.due-date--overdue {
+  background-color: rgba(255, 0, 0, 0.5);
+}
+
+.due-date--soon {
+  background-color: rgb(255, 255, 146, 0.5);
+}
+
+.due-date--later {
+  background-color: rgba(0, 124, 0, 0.5);
+}
+
+.no-due-date {
+  background-color: #f9f9f9;
 }
