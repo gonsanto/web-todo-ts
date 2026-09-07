@@ -20,14 +20,14 @@ function getStoredTodos(): Todo[] {
 
     return Array.isArray(parsedData)
       ? parsedData.filter(
-        (todo): todo is Todo =>
-          typeof todo === 'object' &&
-          todo !== null &&
-          typeof todo.id === 'number' &&
-          typeof todo.text === 'string' &&
-          typeof todo.isDone === 'boolean' &&
-          typeof todo.dueDate === 'string',
-      )
+          (todo): todo is Todo =>
+            typeof todo === 'object' &&
+            todo !== null &&
+            typeof todo.id === 'number' &&
+            typeof todo.text === 'string' &&
+            typeof todo.isDone === 'boolean' &&
+            typeof todo.dueDate === 'string',
+        )
       : []
   } catch {
     isStorageSafe = false
@@ -132,7 +132,7 @@ function addNewElement() {
   }
 
   if (dueDateValue) {
-    const dateNow = new Date().toLocaleDateString('en-CA')
+    const dateNow = getCurrentDate()
     if (dueDateValue < dateNow) {
       dateInput.classList.add('input--error')
       input.classList.add('input--error')
@@ -196,7 +196,7 @@ function clearElements() {
 }
 
 function getCurrentDate(): string {
-  return new Date().toISOString().slice(0, 10)
+  return new Date().toLocaleDateString('en-CA')
 }
 
 function getDueDateStatus(el: string) {
@@ -227,8 +227,16 @@ function getDueDateStatus(el: string) {
   }
   return `due-date--${dueDate}`
 }
+
+let lastKnownDate = getCurrentDate()
+window.addEventListener('focus', () => {
+  const currentDate = getCurrentDate()
+  if (currentDate !== lastKnownDate) {
+    lastKnownDate = currentDate
+    renderTodos()
+  }
+})
 renderTodos()
-console.log(getCurrentDate())
 
 input.addEventListener('keydown', (e: KeyboardEvent) => {
   if (e.key === 'Enter') {
