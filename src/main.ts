@@ -1,5 +1,8 @@
 import './style.css'
+import { getCurrentDate, getDueDateStatus } from './date.ts'
 import { elements } from './dom.ts'
+import { getStoredTodos, isSaveTodo } from './storage.ts'
+import type { Todo } from './types.ts'
 
 const {
   input,
@@ -11,37 +14,6 @@ const {
   overdueMessage,
 } = elements
 
-type Todo = {
-  id: number
-  text: string
-  isDone: boolean
-  dueDate: string
-}
-
-let isStorageSafe = true
-
-function getStoredTodos(): Todo[] {
-  try {
-    const rawData = localStorage.getItem('todos') ?? '[]'
-    const parsedData: unknown = JSON.parse(rawData)
-
-    return Array.isArray(parsedData)
-      ? parsedData.filter(
-          (todo): todo is Todo =>
-            typeof todo === 'object' &&
-            todo !== null &&
-            typeof todo.id === 'number' &&
-            typeof todo.text === 'string' &&
-            typeof todo.isDone === 'boolean' &&
-            typeof todo.dueDate === 'string',
-        )
-      : []
-  } catch {
-    isStorageSafe = false
-    return []
-  }
-}
-
 const todos: Todo[] = getStoredTodos()
 
 function renderTodos() {
@@ -50,22 +22,6 @@ function renderTodos() {
     addTask(Todo)
   })
   updateOverdueTask()
-}
-
-function isSaveTodo(): boolean {
-  if (!isStorageSafe) {
-    console.warn(
-      'Storage read failed. To prevent data loss writing is disabled',
-    )
-    return false
-  }
-  try {
-    localStorage.setItem('todos', JSON.stringify(todos))
-    return true
-  } catch {
-    console.warn('Storage data exceeded or unavailable')
-    return false
-  }
 }
 
 function addTask(el: Todo) {
@@ -89,7 +45,7 @@ function addTask(el: Todo) {
     const previousState = el.isDone
     el.isDone = checkbox.checked
 
-    const savedData = isSaveTodo()
+    const savedData = isSaveTodo(todos)
 
     if (!savedData) {
       el.isDone = previousState
@@ -173,7 +129,7 @@ function addNewElement() {
     dueDate: dueDateValue,
   }
   todos.push(newTodo)
-  const savedData = isSaveTodo()
+  const savedData = isSaveTodo(todos)
 
   if (savedData) {
     renderTodos()
@@ -192,7 +148,7 @@ function removeElement(id: number) {
   const deletedTodo = todos[index]
   todos.splice(index, 1)
 
-  const savedData = isSaveTodo()
+  const savedData = isSaveTodo(todos)
 
   if (savedData) {
     renderTodos()
@@ -208,7 +164,7 @@ function clearElements() {
 
   todos.splice(0, todos.length)
 
-  const savedData = isSaveTodo()
+  const savedData = isSaveTodo(todos)
 
   if (savedData) {
     renderTodos()
@@ -216,39 +172,6 @@ function clearElements() {
     todos.push(...oldTodos)
     alert('Storage is unavailable! Could not clear task.')
   }
-}
-
-function getCurrentDate(): string {
-  return new Date().toLocaleDateString('en-CA')
-}
-
-function getDueDateStatus(el: string) {
-  if (!el) {
-    return 'no-due-date'
-  }
-
-  const dateNow = getCurrentDate()
-  let dueDate: string
-
-  if (el === dateNow) {
-    dueDate = 'today'
-  } else if (el < dateNow) {
-    dueDate = 'overdue'
-  } else {
-    const dueDateObj = new Date(el)
-    const todayObj = new Date(dateNow)
-    const milisecondsToDay = 1000 * 60 * 60 * 24
-
-    const diffTime = dueDateObj.getTime() - todayObj.getTime()
-    const diffDays = Math.round(diffTime / milisecondsToDay)
-
-    if (diffDays >= 1 && diffDays <= 4) {
-      dueDate = 'soon'
-    } else {
-      dueDate = 'later'
-    }
-  }
-  return `due-date--${dueDate}`
 }
 
 let lastKnownDate = getCurrentDate()
