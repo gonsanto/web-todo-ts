@@ -23,7 +23,6 @@ export function getStoredTodos(): Todo[] {
     return []
   }
 }
-
 export function isSaveTodo(todos: Todo[]): boolean {
   if (!isStorageSafe) {
     console.warn(
