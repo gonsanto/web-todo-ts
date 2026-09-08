@@ -1,8 +1,15 @@
 import './style.css'
 import { elements } from './dom.ts'
 
-const { input, addButton, deleteAllButton, todoList, errorMessage, dateInput, overdueMessage } =
-  elements
+const {
+  input,
+  addButton,
+  deleteAllButton,
+  todoList,
+  errorMessage,
+  dateInput,
+  overdueMessage,
+} = elements
 
 type Todo = {
   id: number
@@ -20,14 +27,14 @@ function getStoredTodos(): Todo[] {
 
     return Array.isArray(parsedData)
       ? parsedData.filter(
-        (todo): todo is Todo =>
-          typeof todo === 'object' &&
-          todo !== null &&
-          typeof todo.id === 'number' &&
-          typeof todo.text === 'string' &&
-          typeof todo.isDone === 'boolean' &&
-          typeof todo.dueDate === 'string',
-      )
+          (todo): todo is Todo =>
+            typeof todo === 'object' &&
+            todo !== null &&
+            typeof todo.id === 'number' &&
+            typeof todo.text === 'string' &&
+            typeof todo.isDone === 'boolean' &&
+            typeof todo.dueDate === 'string',
+        )
       : []
   } catch {
     isStorageSafe = false
@@ -89,7 +96,7 @@ function addTask(el: Todo) {
       checkbox.checked = previousState
       alert('Storage is full or unavailable! Changes could not be saved.')
     }
-    renderTodos()
+    updateOverdueTask()
   })
   removeButton.addEventListener('click', () => {
     removeElement(el.id)
@@ -118,9 +125,13 @@ function createDateElement(el: Todo) {
 }
 
 function updateOverdueTask() {
-  const hasOverdueTasks = todos.some((todo) => !todo.isDone && getDueDateStatus(todo.dueDate) === 'due-date--overdue')
+  const hasOverdueTasks = todos.some(
+    (todo) =>
+      !todo.isDone && getDueDateStatus(todo.dueDate) === 'due-date--overdue',
+  )
   if (hasOverdueTasks) {
-    overdueMessage.textContent = 'Attention: You have overdue tasks that require your immediate attention!'
+    overdueMessage.textContent =
+      'Attention: You have overdue tasks that require your immediate attention!'
     overdueMessage.style.display = 'block'
   } else {
     overdueMessage.textContent = ''

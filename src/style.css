@@ -131,6 +131,7 @@ li span {
 }
 
 #overdue-message {
+  display: none;
   background-color: #e53e3e;
   color: white;
   padding: 0.75rem;
@@ -144,9 +145,8 @@ li span {
   0% {
     scale: 100%;
   }
+
   50% {
     scale: 101%;
-  }
-  100% {
   }
 }
