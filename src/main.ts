@@ -1,7 +1,7 @@
 import './style.css'
 import { elements } from './dom.ts'
 
-const { input, addButton, deleteAllButton, todoList, errorMessage, dateInput } =
+const { input, addButton, deleteAllButton, todoList, errorMessage, dateInput, overdueMessage } =
   elements
 
 type Todo = {
@@ -20,14 +20,14 @@ function getStoredTodos(): Todo[] {
 
     return Array.isArray(parsedData)
       ? parsedData.filter(
-          (todo): todo is Todo =>
-            typeof todo === 'object' &&
-            todo !== null &&
-            typeof todo.id === 'number' &&
-            typeof todo.text === 'string' &&
-            typeof todo.isDone === 'boolean' &&
-            typeof todo.dueDate === 'string',
-        )
+        (todo): todo is Todo =>
+          typeof todo === 'object' &&
+          todo !== null &&
+          typeof todo.id === 'number' &&
+          typeof todo.text === 'string' &&
+          typeof todo.isDone === 'boolean' &&
+          typeof todo.dueDate === 'string',
+      )
       : []
   } catch {
     isStorageSafe = false
@@ -42,6 +42,7 @@ function renderTodos() {
   todos.forEach((Todo) => {
     addTask(Todo)
   })
+  updateOverdueTask()
 }
 
 function isSaveTodo(): boolean {
@@ -88,6 +89,7 @@ function addTask(el: Todo) {
       checkbox.checked = previousState
       alert('Storage is full or unavailable! Changes could not be saved.')
     }
+    renderTodos()
   })
   removeButton.addEventListener('click', () => {
     removeElement(el.id)
@@ -115,6 +117,17 @@ function createDateElement(el: Todo) {
   return timeEl
 }
 
+function updateOverdueTask() {
+  const hasOverdueTasks = todos.some((todo) => !todo.isDone && getDueDateStatus(todo.dueDate) === 'due-date--overdue')
+  if (hasOverdueTasks) {
+    overdueMessage.textContent = 'Attention: You have overdue tasks that require your immediate attention!'
+    overdueMessage.style.display = 'block'
+  } else {
+    overdueMessage.textContent = ''
+    overdueMessage.style.display = 'none'
+  }
+}
+
 function addNewElement() {
   errorMessage.textContent = ''
   input.classList.remove('input--error')
@@ -130,7 +143,6 @@ function addNewElement() {
     input.blur()
     return
   }
-
   if (dueDateValue) {
     const dateNow = getCurrentDate()
     if (dueDateValue < dateNow) {

@@ -13,4 +13,5 @@ export const elements = {
   errorMessage: checkNull<HTMLParagraphElement>('#todo-error'),
   deleteAllButton: checkNull<HTMLButtonElement>('#delete-all'),
   dateInput: checkNull<HTMLInputElement>('#todo-date-input'),
+  overdueMessage: checkNull<HTMLParagraphElement>('#overdue-message'),
 }

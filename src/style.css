@@ -15,8 +15,8 @@ ul {
   flex-direction: column;
   overflow-x: hidden;
   background-color: white;
-  border-radius: 10px;
-  padding: 15px;
+  border-radius: 1rem;
+  padding: 0.75rem;
   gap: 1rem;
 }
 
@@ -128,4 +128,25 @@ li span {
 
 .no-due-date {
   background-color: #f9f9f9;
+}
+
+#overdue-message {
+  background-color: #e53e3e;
+  color: white;
+  padding: 0.75rem;
+  border-radius: 0.5rem;
+  font-weight: bold;
+  text-align: center;
+  animation: pulse-in-out 1.5s infinite ease-in-out;
+}
+
+@keyframes pulse-in-out {
+  0% {
+    scale: 100%;
+  }
+  50% {
+    scale: 101%;
+  }
+  100% {
+  }
 }
