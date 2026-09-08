@@ -1,8 +1,15 @@
 import './style.css'
 import { elements } from './dom.ts'
 
-const { input, addButton, deleteAllButton, todoList, errorMessage, dateInput } =
-  elements
+const {
+  input,
+  addButton,
+  deleteAllButton,
+  todoList,
+  errorMessage,
+  dateInput,
+  overdueMessage,
+} = elements
 
 type Todo = {
   id: number
@@ -42,6 +49,7 @@ function renderTodos() {
   todos.forEach((Todo) => {
     addTask(Todo)
   })
+  updateOverdueTask()
 }
 
 function isSaveTodo(): boolean {
@@ -88,6 +96,7 @@ function addTask(el: Todo) {
       checkbox.checked = previousState
       alert('Storage is full or unavailable! Changes could not be saved.')
     }
+    updateOverdueTask()
   })
   removeButton.addEventListener('click', () => {
     removeElement(el.id)
@@ -115,6 +124,21 @@ function createDateElement(el: Todo) {
   return timeEl
 }
 
+function updateOverdueTask() {
+  const hasOverdueTasks = todos.some(
+    (todo) =>
+      !todo.isDone && getDueDateStatus(todo.dueDate) === 'due-date--overdue',
+  )
+  if (hasOverdueTasks) {
+    overdueMessage.textContent =
+      'Attention: You have overdue tasks that require your immediate attention!'
+    overdueMessage.style.display = 'block'
+  } else {
+    overdueMessage.textContent = ''
+    overdueMessage.style.display = 'none'
+  }
+}
+
 function addNewElement() {
   errorMessage.textContent = ''
   input.classList.remove('input--error')
@@ -130,7 +154,6 @@ function addNewElement() {
     input.blur()
     return
   }
-
   if (dueDateValue) {
     const dateNow = getCurrentDate()
     if (dueDateValue < dateNow) {
