@@ -46,7 +46,6 @@ function addTask(el: Todo) {
     el.isDone = checkbox.checked
 
     const savedData = isSaveTodo(todos)
-
     if (!savedData) {
       el.isDone = previousState
       checkbox.checked = previousState
@@ -110,6 +109,7 @@ function addNewElement() {
     input.blur()
     return
   }
+
   if (dueDateValue) {
     const dateNow = getCurrentDate()
     if (dueDateValue < dateNow) {
@@ -149,7 +149,6 @@ function removeElement(id: number) {
   todos.splice(index, 1)
 
   const savedData = isSaveTodo(todos)
-
   if (savedData) {
     renderTodos()
   } else {
@@ -165,7 +164,6 @@ function clearElements() {
   todos.splice(0, todos.length)
 
   const savedData = isSaveTodo(todos)
-
   if (savedData) {
     renderTodos()
   } else {
