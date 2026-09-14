@@ -1,7 +1,14 @@
 import './style.css'
+import { showLoadingSpinner, hideLoadingSpinner } from './updateUi.ts'
 import { getCurrentDate, getDueDateStatus } from './date.ts'
 import { elements } from './dom.ts'
-import { getStoredTodos, isSaveTodo } from './storage.ts'
+import {
+  apiAddTodo,
+  apiClearTodo,
+  apiDeleteTodo,
+  apiUpdateTodo,
+  getStoredTodos,
+} from './todoApi.ts'
 import type { Todo } from './types.ts'
 
 const {
@@ -14,7 +21,16 @@ const {
   overdueMessage,
 } = elements
 
-const todos: Todo[] = getStoredTodos()
+let todos: Todo[] = []
+try {
+  showLoadingSpinner()
+  todos = await getStoredTodos()
+  renderTodos()
+} catch {
+  console.error('Failed to load todos')
+} finally {
+  hideLoadingSpinner()
+}
 
 function renderTodos() {
   todoList.innerHTML = ''
@@ -27,13 +43,13 @@ function renderTodos() {
 function addTask(el: Todo) {
   const todoElements = document.createElement('li')
   todoElements.id = `todo-elements-${el.id}`
-  todoElements.classList.add(getDueDateStatus(el.dueDate))
+  todoElements.classList.add(getDueDateStatus(el.due_date))
 
   const checkbox = document.createElement('input')
-  Object.assign(checkbox, { type: 'checkbox', checked: el.isDone })
+  Object.assign(checkbox, { type: 'checkbox', checked: el.done })
 
   const textSpan = document.createElement('span')
-  textSpan.textContent = el.text
+  textSpan.textContent = el.title
 
   const removeButton = document.createElement('button')
   removeButton.textContent = '🗑'
@@ -41,20 +57,23 @@ function addTask(el: Todo) {
 
   const dateEl = createDateElement(el)
 
-  checkbox.addEventListener('change', () => {
-    const previousState = el.isDone
-    el.isDone = checkbox.checked
-
-    const savedData = isSaveTodo(todos)
-    if (!savedData) {
-      el.isDone = previousState
-      checkbox.checked = previousState
-      alert('Storage is full or unavailable! Changes could not be saved.')
+  checkbox.addEventListener('change', async () => {
+    el.done = checkbox.checked
+    showLoadingSpinner()
+    const checkboxDone = await apiUpdateTodo(el.id, { done: checkbox.checked })
+    hideLoadingSpinner()
+    if (checkboxDone) {
+      updateOverdueTask()
     }
-    updateOverdueTask()
   })
-  removeButton.addEventListener('click', () => {
+  removeButton.addEventListener('click', async () => {
     removeElement(el.id)
+    showLoadingSpinner()
+    const removeCheck = await apiDeleteTodo(el.id)
+    hideLoadingSpinner()
+    if (removeCheck) {
+      renderTodos()
+    }
   })
 
   todoElements.appendChild(checkbox)
@@ -67,14 +86,14 @@ function addTask(el: Todo) {
 }
 
 function createDateElement(el: Todo) {
-  if (!el.dueDate) {
+  if (!el.due_date) {
     const noDueDate = document.createElement('p')
     noDueDate.textContent = 'no due date'
     return noDueDate
   }
 
   const timeEl = document.createElement('time')
-  timeEl.textContent = el.dueDate
+  timeEl.textContent = el.due_date
 
   return timeEl
 }
@@ -82,7 +101,7 @@ function createDateElement(el: Todo) {
 function updateOverdueTask() {
   const hasOverdueTasks = todos.some(
     (todo) =>
-      !todo.isDone && getDueDateStatus(todo.dueDate) === 'due-date--overdue',
+      !todo.done && getDueDateStatus(todo.due_date) === 'due-date--overdue',
   )
   if (hasOverdueTasks) {
     overdueMessage.textContent =
@@ -94,7 +113,7 @@ function updateOverdueTask() {
   }
 }
 
-function addNewElement() {
+async function addNewElement() {
   errorMessage.textContent = ''
   input.classList.remove('input--error')
   dateInput.classList.remove('input--error')
@@ -119,23 +138,20 @@ function addNewElement() {
       return
     }
   }
-
-  const lastId: number =
-    todos.length > 0 ? Math.max(...todos.map((todo) => todo.id)) : -1
-  const newTodo = {
-    id: lastId + 1,
-    text: inputValue,
-    isDone: false,
-    dueDate: dueDateValue,
+  const newTodoAPI = {
+    title: inputValue,
+    content: '',
+    done: false,
+    due_date: dueDateValue ? dueDateValue : null,
   }
-  todos.push(newTodo)
-  const savedData = isSaveTodo(todos)
 
-  if (savedData) {
+  const createdTodo = await apiAddTodo(newTodoAPI)
+
+  if (createdTodo) {
+    todos.push(createdTodo)
     renderTodos()
   } else {
-    todos.pop()
-    errorMessage.textContent = 'Storage is full! Could not save new task.'
+    errorMessage.textContent = 'Failed to save new task to the server.'
   }
   input.value = ''
   dateInput.value = ''
@@ -143,32 +159,17 @@ function addNewElement() {
 
 function removeElement(id: number) {
   const index = todos.findIndex((todo) => todo.id === id)
-  if (index === -1) return
-
-  const deletedTodo = todos[index]
   todos.splice(index, 1)
-
-  const savedData = isSaveTodo(todos)
-  if (savedData) {
-    renderTodos()
-  } else {
-    todos.splice(index, 0, deletedTodo)
-    alert('Storage is full or unavailable! Could not remove task.')
-  }
 }
 
-function clearElements() {
+async function clearElements() {
   if (todos.length === 0) return
-  const oldTodos = [...todos]
-
   todos.splice(0, todos.length)
-
-  const savedData = isSaveTodo(todos)
-  if (savedData) {
+  showLoadingSpinner()
+  const clearCheck = await apiClearTodo()
+  hideLoadingSpinner()
+  if (clearCheck) {
     renderTodos()
-  } else {
-    todos.push(...oldTodos)
-    alert('Storage is unavailable! Could not clear task.')
   }
 }
 

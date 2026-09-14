@@ -7,6 +7,7 @@ function checkNull<T extends HTMLElement>(selector: string): T {
 }
 
 export const elements = {
+  main: checkNull<HTMLElement>('main'),
   input: checkNull<HTMLInputElement>('#todo-input'),
   addButton: checkNull<HTMLButtonElement>('#add-todo-button'),
   todoList: checkNull<HTMLUListElement>('#todo-list'),

@@ -1,6 +1,7 @@
 export type Todo = {
   id: number
-  text: string
-  isDone: boolean
-  dueDate: string
+  title: string
+  content?: string
+  done: boolean
+  due_date: string | null
 }
