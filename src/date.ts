@@ -2,7 +2,7 @@ export const getCurrentDate = () => {
   return new Date().toLocaleDateString('en-CA')
 }
 
-export function getDueDateStatus(el: string) {
+export function getDueDateStatus(el: string | null) {
   if (!el) {
     return 'no-due-date'
   }
