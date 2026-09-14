@@ -4,21 +4,17 @@ const url = 'https://api.todos.in.jt-lab.ch/'
 const jsonApplication = 'application/json'
 
 export async function getStoredTodos(): Promise<Todo[]> {
-  try {
-    const response = await fetch(`${url}todos`, {
-      headers: { Accept: jsonApplication },
-    })
-    if (!response.ok) {
-      throw new Error(`HTTP error! status: ${response.status}`)
-    }
-    const data: unknown = await response.json()
-    return Array.isArray(data) ? data : []
-  } catch (error) {
-    console.error('Failed to fetch todos from API:', error)
-    return []
+  const response = await fetch(`${url}todos`, {
+    headers: { Accept: jsonApplication },
+  })
+  if (!response.ok) {
+    throw new Error(`HTTP error! status: ${response.status}`)
   }
+  const data: unknown = await response.json()
+  return Array.isArray(data) ? data : []
 }
 
+// Omit<Todo, 'id'> is present because the API already gives out an id
 export async function apiAddTodo(
   newTodo: Omit<Todo, 'id'>,
 ): Promise<Todo | null> {

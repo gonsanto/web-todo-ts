@@ -1,5 +1,4 @@
 import './style.css'
-import { showLoadingSpinner, hideLoadingSpinner } from './updateUi.ts'
 import { getCurrentDate, getDueDateStatus } from './date.ts'
 import { elements } from './dom.ts'
 import {
@@ -10,6 +9,7 @@ import {
   getStoredTodos,
 } from './todoApi.ts'
 import type { Todo } from './types.ts'
+import { hideLoadingSpinner, showLoadingSpinner } from './updateUi.ts'
 
 const {
   input,
@@ -28,6 +28,8 @@ try {
   renderTodos()
 } catch {
   console.error('Failed to load todos')
+  errorMessage.textContent =
+    'Failed to load todos from the server. Please try again later.'
 } finally {
   hideLoadingSpinner()
 }
@@ -58,20 +60,23 @@ function addTask(el: Todo) {
   const dateEl = createDateElement(el)
 
   checkbox.addEventListener('change', async () => {
-    el.done = checkbox.checked
     showLoadingSpinner()
     const checkboxDone = await apiUpdateTodo(el.id, { done: checkbox.checked })
     hideLoadingSpinner()
     if (checkboxDone) {
+      el.done = checkbox.checked
       updateOverdueTask()
     }
   })
   removeButton.addEventListener('click', async () => {
-    removeElement(el.id)
     showLoadingSpinner()
     const removeCheck = await apiDeleteTodo(el.id)
     hideLoadingSpinner()
     if (removeCheck) {
+      removeElement(el.id)
+      renderTodos()
+    } else {
+      errorMessage.textContent = 'Failed to delete todo from the server'
       renderTodos()
     }
   })
@@ -112,8 +117,10 @@ function updateOverdueTask() {
     overdueMessage.style.display = 'none'
   }
 }
-
+let isAdding = false
 async function addNewElement() {
+  if (isAdding) return
+
   errorMessage.textContent = ''
   input.classList.remove('input--error')
   dateInput.classList.remove('input--error')
@@ -144,31 +151,40 @@ async function addNewElement() {
     done: false,
     due_date: dueDateValue ? dueDateValue : null,
   }
+  try {
+    isAdding = true
+    showLoadingSpinner()
+    const createdTodo = await apiAddTodo(newTodoAPI)
 
-  const createdTodo = await apiAddTodo(newTodoAPI)
-
-  if (createdTodo) {
-    todos.push(createdTodo)
-    renderTodos()
-  } else {
-    errorMessage.textContent = 'Failed to save new task to the server.'
+    if (createdTodo) {
+      todos.push(createdTodo)
+      renderTodos()
+      input.value = ''
+      dateInput.value = ''
+    } else {
+      errorMessage.textContent = 'Failed to save new todo to the server.'
+    }
+  } catch (error) {
+    console.error('Failes to add task', error)
+  } finally {
+    isAdding = false
+    hideLoadingSpinner()
   }
-  input.value = ''
-  dateInput.value = ''
 }
 
 function removeElement(id: number) {
   const index = todos.findIndex((todo) => todo.id === id)
+  if (index === -1) return
   todos.splice(index, 1)
 }
 
 async function clearElements() {
   if (todos.length === 0) return
-  todos.splice(0, todos.length)
   showLoadingSpinner()
   const clearCheck = await apiClearTodo()
   hideLoadingSpinner()
   if (clearCheck) {
+    todos.splice(0, todos.length)
     renderTodos()
   }
 }
