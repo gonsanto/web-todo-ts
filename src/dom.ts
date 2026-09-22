@@ -8,11 +8,16 @@ function checkNull<T extends HTMLElement>(selector: string): T {
 
 export const elements = {
   main: checkNull<HTMLElement>('main'),
-  input: checkNull<HTMLInputElement>('#todo-input'),
-  addButton: checkNull<HTMLButtonElement>('#add-todo-button'),
+  todoInput: checkNull<HTMLInputElement>('#todo-input'),
+  addTodoButton: checkNull<HTMLButtonElement>('#add-todo-button'),
   todoList: checkNull<HTMLUListElement>('#todo-list'),
-  errorMessage: checkNull<HTMLParagraphElement>('#todo-error'),
+  todoErrorMessage: checkNull<HTMLParagraphElement>('#todo-error'),
   deleteAllButton: checkNull<HTMLButtonElement>('#delete-all'),
   dateInput: checkNull<HTMLInputElement>('#todo-date-input'),
   overdueMessage: checkNull<HTMLParagraphElement>('#overdue-message'),
+  categoryInput: checkNull<HTMLInputElement>('#category-name-input'),
+  addCategoryButton: checkNull<HTMLButtonElement>('#add-category-button'),
+  categoryList: checkNull<HTMLUListElement>('#category-list'),
+  colorInput: checkNull<HTMLInputElement>('#category-color-input'),
+  categoryErrorMessage: checkNull<HTMLParagraphElement>('#category-error'),
 }

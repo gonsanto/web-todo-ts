@@ -1,10 +1,10 @@
-import type { Todo } from './types.ts'
+import type { Category } from './types'
 
 const url = 'https://api.todos.in.jt-lab.ch/'
 const jsonApplication = 'application/json'
 
-export async function getStoredTodos(): Promise<Todo[]> {
-  const response = await fetch(`${url}todos`, {
+export async function getApiCategories(): Promise<Category[]> {
+  const response = await fetch(`${url}categories`, {
     headers: { Accept: jsonApplication },
   })
   if (!response.ok) {
@@ -14,12 +14,12 @@ export async function getStoredTodos(): Promise<Todo[]> {
   return Array.isArray(data) ? data : []
 }
 
-// Omit<Todo, 'id'> is present because the API already gives out an id
-export async function apiAddTodo(
-  newTodo: Omit<Todo, 'id'>,
-): Promise<Todo | null> {
+// Omit<Category, 'id'> is present to omit the id in the Category type since the API already gives out an id
+export async function addApiCategories(
+  newTodo: Omit<Category, 'id'>,
+): Promise<Category | null> {
   try {
-    const response = await fetch(`${url}todos`, {
+    const response = await fetch(`${url}categories`, {
       method: 'POST',
       headers: {
         'Content-Type': jsonApplication,
@@ -33,17 +33,17 @@ export async function apiAddTodo(
     const data = await response.json()
     return Array.isArray(data) ? data[0] : data
   } catch (error) {
-    console.error('API add error:', error)
+    console.error('Category add error:', error)
     return null
   }
 }
 
-export async function apiUpdateTodo(
+export async function updateApiCategories(
   id: number,
-  update: Partial<Todo>,
+  update: Partial<Category>,
 ): Promise<boolean> {
   try {
-    const response = await fetch(`${url}todos?id=eq.${id}`, {
+    const response = await fetch(`${url}categories?id=eq.${id}`, {
       method: 'PATCH',
       headers: { 'Content-Type': jsonApplication },
       body: JSON.stringify(update),
@@ -54,15 +54,14 @@ export async function apiUpdateTodo(
 
     return true
   } catch (error) {
-    console.error('API Update error', error)
+    console.error('Category Update error', error)
     return false
   }
 }
 
-// Omit<Todo, 'id'> is present because the API already gives out an id
-export async function apiDeleteTodo(id: number): Promise<boolean> {
+export async function deleteApiCategories(id: number): Promise<boolean> {
   try {
-    const response = await fetch(`${url}todos?id=eq.${id}`, {
+    const response = await fetch(`${url}categories?id=eq.${id}`, {
       method: 'DELETE',
     })
 
@@ -72,12 +71,12 @@ export async function apiDeleteTodo(id: number): Promise<boolean> {
 
     return true
   } catch (error) {
-    console.error('API Delete error:', error)
+    console.error('Category Delete error:', error)
     return false
   }
 }
 
-export async function apiClearTodo(): Promise<boolean> {
+export async function ClearCategories(): Promise<boolean> {
   try {
     const response = await fetch(`${url}todos`, {
       method: 'DELETE',
