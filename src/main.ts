@@ -61,10 +61,8 @@ let isEditing = false
 let editedCategoryId: number
 const addCategory = (el: Category) => {
   const category = document.createElement('li')
-  Object.assign(category, {
-    id: `categories-elements-${el.id}`,
-    style: `background: ${el.color};`,
-  })
+  category.id = `categories-elements-${el.id}`
+  category.style.backgroundColor = el.color
 
   const textSpan = document.createElement('span')
   textSpan.textContent = el.title
@@ -107,10 +105,8 @@ const addCategory = (el: Category) => {
 }
 
 const addNewCategory = async () => {
-  if (isAdding) return
-
   categoryErrorMessage.textContent = ''
-  categoryInput.classList.remove('category--error')
+  categoryInput.classList.remove('input--error')
 
   const categoryValue = categoryInput.value
   const colorValue = colorInput.value
@@ -127,7 +123,6 @@ const addNewCategory = async () => {
     color: colorValue,
   }
   try {
-    isAdding = true
     showLoadingSpinner()
     const createdCategory = await addApiCategories(newCategory)
 
@@ -143,7 +138,6 @@ const addNewCategory = async () => {
   } catch (error) {
     console.error('Failes to add category', error)
   } finally {
-    isAdding = false
     hideLoadingSpinner()
   }
 }
@@ -302,10 +296,7 @@ function updateOverdueTask() {
   }
 }
 
-let isAdding = false
 async function addNewElement() {
-  if (isAdding) return
-
   todoErrorMessage.textContent = ''
   todoInput.classList.remove('input--error')
   dateInput.classList.remove('input--error')
@@ -315,15 +306,18 @@ async function addNewElement() {
 
   if (inputValue.trim() === '') {
     todoInput.classList.add('input--error')
-    dateInput.classList.add('input--error')
-    todoErrorMessage.textContent = 'The input should not be empty !'
+    if (dueDateValue && dueDateValue < getCurrentDate()) {
+      dateInput.classList.add('input--error')
+      todoErrorMessage.textContent = 'The input and date are not valid'
+    } else {
+      todoErrorMessage.textContent = 'The input should not be empty !'
+    }
     todoInput.blur()
     return
   }
 
   if (dueDateValue && dueDateValue < getCurrentDate()) {
     dateInput.classList.add('input--error')
-    todoInput.classList.add('input--error')
     todoErrorMessage.textContent = 'Due date cannot be in the past !'
     return
   }
@@ -334,7 +328,6 @@ async function addNewElement() {
     due_date: dueDateValue ? dueDateValue : null,
   }
   try {
-    isAdding = true
     showLoadingSpinner()
     const createdTodo = await apiAddTodo(newTodoAPI)
 
@@ -349,7 +342,6 @@ async function addNewElement() {
   } catch (error) {
     console.error('Failes to add task', error)
   } finally {
-    isAdding = false
     hideLoadingSpinner()
   }
 }

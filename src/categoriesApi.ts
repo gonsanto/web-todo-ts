@@ -78,7 +78,7 @@ export async function deleteApiCategories(id: number): Promise<boolean> {
 
 export async function ClearCategories(): Promise<boolean> {
   try {
-    const response = await fetch(`${url}todos`, {
+    const response = await fetch(`${url}categories`, {
       method: 'DELETE',
     })
     if (!response.ok) {
