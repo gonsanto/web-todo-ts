@@ -36,10 +36,11 @@ button {
   cursor: pointer;
 }
 
-#delete-all {
+#delete-all-todos,
+#delete-all-categories {
   margin-bottom: 20px;
   padding: 0.5rem;
-  box-shadow: 0rem 1rem 5rem 1rem rgba(0, 0, 0, 0.08);
+  box-shadow: 0rem 1rem 5rem 1rem rgba(0, 0, 0, 0.05);
 }
 
 main {
@@ -72,6 +73,7 @@ li {
   align-items: center;
   padding: 1rem;
   gap: 2rem;
+  box-shadow: 0rem 0rem 0.1rem 0rem black;
 }
 
 #todo-error,

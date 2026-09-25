@@ -44,7 +44,10 @@ const renderCategories = () => {
 
   const empty = categories.length === 0
   categoryList.classList.toggle('hidden', empty)
-  deleteAllCategoriesButton.classList.toggle('hidden', empty)
+  deleteAllCategoriesButton.classList.toggle(
+    'hidden',
+    empty || !categoriesLoaded,
+  )
 }
 
 let categories: Category[] = []
@@ -243,7 +246,7 @@ function renderTodos() {
 
   const empty = todos.length === 0
   todoList.classList.toggle('hidden', empty)
-  deleteAllTodosButton.classList.toggle('hidden', empty)
+  deleteAllTodosButton.classList.toggle('hidden', empty || !todosLoaded)
 }
 
 function addTask(el: Todo) {
