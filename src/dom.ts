@@ -12,7 +12,6 @@ export const elements = {
   addTodoButton: checkNull<HTMLButtonElement>('#add-todo-button'),
   todoList: checkNull<HTMLUListElement>('#todo-list'),
   todoErrorMessage: checkNull<HTMLParagraphElement>('#todo-error'),
-  deleteAllButton: checkNull<HTMLButtonElement>('#delete-all'),
   dateInput: checkNull<HTMLInputElement>('#todo-date-input'),
   overdueMessage: checkNull<HTMLParagraphElement>('#overdue-message'),
   categoryInput: checkNull<HTMLInputElement>('#category-name-input'),
@@ -20,4 +19,8 @@ export const elements = {
   categoryList: checkNull<HTMLUListElement>('#category-list'),
   colorInput: checkNull<HTMLInputElement>('#category-color-input'),
   categoryErrorMessage: checkNull<HTMLParagraphElement>('#category-error'),
+  deleteAllTodosButton: checkNull<HTMLButtonElement>('#delete-all-todos'),
+  deleteAllCategoriesButton: checkNull<HTMLButtonElement>(
+    '#delete-all-categories',
+  ),
 }

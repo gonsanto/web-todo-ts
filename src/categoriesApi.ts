@@ -16,7 +16,7 @@ export async function getApiCategories(): Promise<Category[]> {
 
 // Omit<Category, 'id'> is present to omit the id in the Category type since the API already gives out an id
 export async function addApiCategories(
-  newTodo: Omit<Category, 'id'>,
+  newCategory: Omit<Category, 'id'>,
 ): Promise<Category | null> {
   try {
     const response = await fetch(`${url}categories`, {
@@ -25,10 +25,10 @@ export async function addApiCategories(
         'Content-Type': jsonApplication,
         Prefer: 'return=representation',
       },
-      body: JSON.stringify(newTodo),
+      body: JSON.stringify(newCategory),
     })
     if (!response.ok) {
-      throw new Error(`Failed to add todo: ${response.status}`)
+      throw new Error(`Failed to add category: ${response.status}`)
     }
     const data = await response.json()
     return Array.isArray(data) ? data[0] : data

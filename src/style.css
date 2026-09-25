@@ -202,3 +202,7 @@ li span {
 #category-list .editing {
   outline: 2px solid rgb(53, 132, 228);
 }
+
+.hidden {
+  display: none;
+}

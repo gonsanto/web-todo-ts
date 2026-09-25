@@ -23,7 +23,6 @@ const {
   categoryInput,
   addTodoButton,
   addCategoryButton,
-  deleteAllButton,
   todoList,
   categoryList,
   todoErrorMessage,
@@ -31,27 +30,29 @@ const {
   dateInput,
   colorInput,
   overdueMessage,
+  deleteAllTodosButton,
+  deleteAllCategoriesButton,
 } = elements
 colorInput.value = '#f9f9f9'
 
+let categoriesLoaded = false
 const renderCategories = () => {
   categoryList.innerHTML = ''
-  if (categories.length === 0) {
-    categoryList.style.display = 'none'
-  } else {
-    categoryList.style.display = 'flex'
-  }
   categories.forEach((Category) => {
     addCategory(Category)
   })
+
+  const empty = categories.length === 0
+  categoryList.classList.toggle('hidden', empty)
+  deleteAllCategoriesButton.classList.toggle('hidden', empty)
 }
 
 let categories: Category[] = []
 try {
   showLoadingSpinner()
   categories = await getApiCategories()
+  categoriesLoaded = true
 } catch {
-  console.error('Failed to load categories')
   categoryErrorMessage.textContent =
     'Failed to load categories from the server. Please try again later.'
 } finally {
@@ -101,11 +102,9 @@ const addCategory = (el: Category) => {
         removeElement(categories, el.id)
         if (editedCategoryId === el.id) resetEditedCategory()
         renderCategories()
+      } else {
+        categoryErrorMessage.textContent = 'Failed to delete category from the server'
       }
-    } catch {
-      categoryErrorMessage.textContent =
-        'Failed to delete category from the server'
-      renderCategories()
     } finally {
       hideLoadingSpinner()
     }
@@ -221,12 +220,13 @@ function resetEditedCategory() {
   editedCategoryId = null
 }
 
+let todosLoaded = false
 let todos: Todo[] = []
 try {
   showLoadingSpinner()
   todos = await getStoredTodos()
+  todosLoaded = true
 } catch {
-  console.error('Failed to load todos')
   todoErrorMessage.textContent =
     'Failed to load todos from the server. Please try again later.'
 } finally {
@@ -235,15 +235,14 @@ try {
 
 function renderTodos() {
   todoList.innerHTML = ''
-  if (todos.length === 0) {
-    todoList.style.display = 'none'
-  } else {
-    todoList.style.display = 'flex'
-  }
   todos.forEach((Todo) => {
     addTask(Todo)
   })
   updateOverdueTask()
+
+  const empty = todos.length === 0
+  todoList.classList.toggle('hidden', empty)
+  deleteAllTodosButton.classList.toggle('hidden', empty)
 }
 
 function addTask(el: Todo) {
@@ -264,18 +263,20 @@ function addTask(el: Todo) {
   const dateEl = createDateElement(el)
 
   checkbox.addEventListener('change', async () => {
+    const submit = checkbox.checked
+    checkbox.disabled = true
     showLoadingSpinner()
     try {
-      const checkboxDone = await apiUpdateTodo(el.id, {
-        done: checkbox.checked,
-      })
+      const checkboxDone = await apiUpdateTodo(el.id, { done: submit })
       if (checkboxDone) {
-        el.done = checkbox.checked
+        el.done = submit
         updateOverdueTask()
-      } else {
-        checkbox.checked = !checkbox.checked
+      } else if (checkbox.checked === submit) {
+        checkbox.checked = !submit
+        todoErrorMessage.textContent = 'Failed to update todo from the server'
       }
     } finally {
+      checkbox.disabled = false
       hideLoadingSpinner()
     }
   })
@@ -286,10 +287,9 @@ function addTask(el: Todo) {
       if (removeCheck) {
         removeElement(todos, el.id)
         renderTodos()
+      } else {
+        todoErrorMessage.textContent = 'Failed to delete todo from the server'
       }
-    } catch {
-      todoErrorMessage.textContent = 'Failed to delete todo from the server'
-      renderTodos()
     } finally {
       hideLoadingSpinner()
     }
@@ -398,22 +398,34 @@ function removeElement(element: Todo[] | Category[], id: number) {
   element.splice(index, 1)
 }
 
-async function clearElements() {
-  if (todos.length === 0 && categories.length === 0) return
+async function clearElements(list: string) {
+  if (list === 'todos' && !todosLoaded) {
+    todoErrorMessage.textContent = 'Cannot clear todos: they were not loaded from the server.'
+    return
+  }
+  if (list === 'categories' && !categoriesLoaded) {
+    categoryErrorMessage.textContent = 'Cannot clear categories: they were not loaded from the server.'
+    return
+  }
+  if (list === 'todos' && todos.length === 0) return
+  if (list === 'categories' && categories.length === 0) return
+
   showLoadingSpinner()
   try {
-    const clearTodosCheck = await apiClearTodo()
-    const clearCategoriesCheck = await clearCategories()
-
-    if (clearTodosCheck) {
-      todos.splice(0, todos.length)
-      renderTodos()
+    if (list === 'todos') {
+      const clearTodosCheck = await apiClearTodo()
+      if (clearTodosCheck) {
+        todos.splice(0, todos.length)
+        renderTodos()
+      }
     }
-
-    if (clearCategoriesCheck) {
-      categories.splice(0, categories.length)
-      resetEditedCategory()
-      renderCategories()
+    if (list === 'categories') {
+      const clearCategoriesCheck = await clearCategories()
+      if (clearCategoriesCheck) {
+        categories.splice(0, categories.length)
+        resetEditedCategory()
+        renderCategories()
+      }
     }
   } finally {
     hideLoadingSpinner()
@@ -455,6 +467,10 @@ addCategoryButton.addEventListener('click', () => {
     addNewCategory()
   }
 })
-deleteAllButton.addEventListener('click', () => {
-  clearElements()
+
+deleteAllTodosButton.addEventListener('click', () => {
+  clearElements('todos')
+})
+deleteAllCategoriesButton.addEventListener('click', () => {
+  clearElements('categories')
 })
