@@ -103,7 +103,8 @@ const addCategory = (el: Category) => {
         if (editedCategoryId === el.id) resetEditedCategory()
         renderCategories()
       } else {
-        categoryErrorMessage.textContent = 'Failed to delete category from the server'
+        categoryErrorMessage.textContent =
+          'Failed to delete category from the server'
       }
     } finally {
       hideLoadingSpinner()
@@ -400,11 +401,13 @@ function removeElement(element: Todo[] | Category[], id: number) {
 
 async function clearElements(list: string) {
   if (list === 'todos' && !todosLoaded) {
-    todoErrorMessage.textContent = 'Cannot clear todos: they were not loaded from the server.'
+    todoErrorMessage.textContent =
+      'Cannot clear todos: they were not loaded from the server.'
     return
   }
   if (list === 'categories' && !categoriesLoaded) {
-    categoryErrorMessage.textContent = 'Cannot clear categories: they were not loaded from the server.'
+    categoryErrorMessage.textContent =
+      'Cannot clear categories: they were not loaded from the server.'
     return
   }
   if (list === 'todos' && todos.length === 0) return
