@@ -49,7 +49,7 @@ export async function updateApiCategories(
       body: JSON.stringify(update),
     })
     if (!response.ok) {
-      throw new Error(`Failed to update todo: ${response.status}`)
+      throw new Error(`Failed to update category: ${response.status}`)
     }
 
     return true
@@ -66,7 +66,7 @@ export async function deleteApiCategories(id: number): Promise<boolean> {
     })
 
     if (!response.ok) {
-      throw new Error(`Failed to delete todo: ${response.status}`)
+      throw new Error(`Failed to delete category: ${response.status}`)
     }
 
     return true
@@ -76,13 +76,13 @@ export async function deleteApiCategories(id: number): Promise<boolean> {
   }
 }
 
-export async function ClearCategories(): Promise<boolean> {
+export async function clearCategories(): Promise<boolean> {
   try {
     const response = await fetch(`${url}categories`, {
       method: 'DELETE',
     })
     if (!response.ok) {
-      throw new Error(`Failed to clear todo: ${response.status}`)
+      throw new Error(`Failed to clear category: ${response.status}`)
     }
     return true
   } catch (error) {

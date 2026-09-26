@@ -198,3 +198,7 @@ li span {
   height: 2rem;
   width: 2rem;
 }
+
+#category-list .editing {
+  outline: 2px solid rgb(53, 132, 228);
+}
