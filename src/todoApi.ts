@@ -59,6 +59,7 @@ export async function apiUpdateTodo(
   }
 }
 
+// Omit<Todo, 'id'> is present because the API already gives out an id
 export async function apiDeleteTodo(id: number): Promise<boolean> {
   try {
     const response = await fetch(`${url}todos?id=eq.${id}`, {

@@ -1,4 +1,11 @@
 import './style.css'
+import {
+  addApiCategories,
+  clearCategories,
+  deleteApiCategories,
+  getApiCategories,
+  updateApiCategories,
+} from './categoriesApi.ts'
 import { getCurrentDate, getDueDateStatus } from './date.ts'
 import { elements } from './dom.ts'
 import {
@@ -8,27 +15,223 @@ import {
   apiUpdateTodo,
   getStoredTodos,
 } from './todoApi.ts'
-import type { Todo } from './types.ts'
+import type { Category, Todo } from './types.ts'
 import { hideLoadingSpinner, showLoadingSpinner } from './updateUi.ts'
 
 const {
-  input,
-  addButton,
-  deleteAllButton,
+  todoInput,
+  categoryInput,
+  addTodoButton,
+  addCategoryButton,
   todoList,
-  errorMessage,
+  categoryList,
+  todoErrorMessage,
+  categoryErrorMessage,
   dateInput,
+  colorInput,
   overdueMessage,
+  deleteAllTodosButton,
+  deleteAllCategoriesButton,
 } = elements
+colorInput.value = '#f9f9f9'
 
+let categoriesLoaded = false
+const renderCategories = () => {
+  categoryList.innerHTML = ''
+  categories.forEach((Category) => {
+    addCategory(Category)
+  })
+
+  const empty = categories.length === 0
+  categoryList.classList.toggle('hidden', empty)
+  deleteAllCategoriesButton.classList.toggle(
+    'hidden',
+    empty || !categoriesLoaded,
+  )
+}
+
+let categories: Category[] = []
+try {
+  showLoadingSpinner()
+  categories = await getApiCategories()
+  categoriesLoaded = true
+} catch {
+  categoryErrorMessage.textContent =
+    'Failed to load categories from the server. Please try again later.'
+} finally {
+  hideLoadingSpinner()
+}
+
+let isTodoPending = false
+let isCategoryPending = false
+let isEditingCategory = false
+let editedCategoryId: number | null = null
+
+const addCategory = (el: Category) => {
+  const category = document.createElement('li')
+  category.id = `categories-elements-${el.id}`
+  category.style.backgroundColor = el.color
+
+  const textSpan = document.createElement('span')
+  textSpan.textContent = el.title
+
+  const editButton = document.createElement('button')
+  editButton.textContent = 'edit'
+  editButton.style.cursor = 'pointer'
+
+  const removeButton = document.createElement('button')
+  removeButton.textContent = '🗑'
+  removeButton.style.cursor = 'pointer'
+
+  editButton.addEventListener('click', () => {
+    categoryList.querySelectorAll('li').forEach((li) => {
+      li.classList.remove('editing')
+    })
+    category.classList.add('editing')
+
+    editedCategoryId = el.id
+    categoryInput.value = el.title
+    colorInput.value = el.color
+    addCategoryButton.textContent = 'save'
+    isEditingCategory = true
+    categoryInput.focus()
+  })
+
+  removeButton.addEventListener('click', async () => {
+    showLoadingSpinner()
+    try {
+      const removeCheck = await deleteApiCategories(el.id)
+      if (removeCheck) {
+        removeElement(categories, el.id)
+        if (editedCategoryId === el.id) resetEditedCategory()
+        renderCategories()
+      } else {
+        categoryErrorMessage.textContent =
+          'Failed to delete category from the server'
+      }
+    } finally {
+      hideLoadingSpinner()
+    }
+  })
+
+  category.appendChild(textSpan)
+  category.appendChild(editButton)
+  category.appendChild(removeButton)
+  categoryList.appendChild(category)
+}
+
+const addNewCategory = async () => {
+  if (isCategoryPending) return
+  isCategoryPending = true
+  addCategoryButton.disabled = true
+  categoryInput.disabled = true
+  colorInput.disabled = true
+
+  try {
+    categoryErrorMessage.textContent = ''
+    categoryInput.classList.remove('input--error')
+
+    const categoryValue = categoryInput.value.trim()
+    const colorValue = colorInput.value
+
+    if (categoryValue === '') {
+      categoryInput.classList.add('input--error')
+      categoryErrorMessage.textContent = 'The input should not be empty !'
+      return
+    }
+
+    showLoadingSpinner()
+    const createdCategory = await addApiCategories({
+      title: categoryValue,
+      color: colorValue,
+    })
+
+    if (createdCategory) {
+      categories.push(createdCategory)
+      renderCategories()
+      categoryInput.value = ''
+      colorInput.value = '#f9f9f9'
+    } else {
+      categoryErrorMessage.textContent =
+        'Failed to save new category to the server.'
+    }
+  } catch (error) {
+    console.error('Failed to add category', error)
+  } finally {
+    isCategoryPending = false
+    addCategoryButton.disabled = false
+    categoryInput.disabled = false
+    colorInput.disabled = false
+    hideLoadingSpinner()
+  }
+}
+
+async function editCategory() {
+  if (isCategoryPending) return
+  if (editedCategoryId === null) return
+  isCategoryPending = true
+  addCategoryButton.disabled = true
+  categoryInput.disabled = true
+  colorInput.disabled = true
+
+  try {
+    categoryErrorMessage.textContent = ''
+    categoryInput.classList.remove('input--error')
+
+    const categoryValue = categoryInput.value.trim()
+    const colorValue = colorInput.value
+
+    if (categoryValue === '') {
+      categoryInput.classList.add('input--error')
+      categoryErrorMessage.textContent = 'The input should not be empty !'
+      return
+    }
+
+    showLoadingSpinner()
+    const isSuccess = await updateApiCategories(editedCategoryId, {
+      title: categoryValue,
+      color: colorValue,
+    })
+
+    if (isSuccess) {
+      const index = categories.findIndex((c) => c.id === editedCategoryId)
+      if (index !== -1) {
+        categories[index].title = categoryValue
+        categories[index].color = colorValue
+      }
+      renderCategories()
+      resetEditedCategory()
+    } else {
+      categoryErrorMessage.textContent =
+        'Failed to update category on the server.'
+    }
+  } catch (error) {
+    console.error('Failed to edit category:', error)
+  } finally {
+    isCategoryPending = false
+    addCategoryButton.disabled = false
+    categoryInput.disabled = false
+    colorInput.disabled = false
+    hideLoadingSpinner()
+  }
+}
+
+function resetEditedCategory() {
+  categoryInput.value = ''
+  colorInput.value = '#f9f9f9'
+  addCategoryButton.textContent = 'add'
+  isEditingCategory = false
+  editedCategoryId = null
+}
+
+let todosLoaded = false
 let todos: Todo[] = []
 try {
   showLoadingSpinner()
   todos = await getStoredTodos()
-  renderTodos()
+  todosLoaded = true
 } catch {
-  console.error('Failed to load todos')
-  errorMessage.textContent =
+  todoErrorMessage.textContent =
     'Failed to load todos from the server. Please try again later.'
 } finally {
   hideLoadingSpinner()
@@ -40,6 +243,10 @@ function renderTodos() {
     addTask(Todo)
   })
   updateOverdueTask()
+
+  const empty = todos.length === 0
+  todoList.classList.toggle('hidden', empty)
+  deleteAllTodosButton.classList.toggle('hidden', empty || !todosLoaded)
 }
 
 function addTask(el: Todo) {
@@ -60,24 +267,35 @@ function addTask(el: Todo) {
   const dateEl = createDateElement(el)
 
   checkbox.addEventListener('change', async () => {
+    const submit = checkbox.checked
+    checkbox.disabled = true
     showLoadingSpinner()
-    const checkboxDone = await apiUpdateTodo(el.id, { done: checkbox.checked })
-    hideLoadingSpinner()
-    if (checkboxDone) {
-      el.done = checkbox.checked
-      updateOverdueTask()
+    try {
+      const checkboxDone = await apiUpdateTodo(el.id, { done: submit })
+      if (checkboxDone) {
+        el.done = submit
+        updateOverdueTask()
+      } else if (checkbox.checked === submit) {
+        checkbox.checked = !submit
+        todoErrorMessage.textContent = 'Failed to update todo from the server'
+      }
+    } finally {
+      checkbox.disabled = false
+      hideLoadingSpinner()
     }
   })
   removeButton.addEventListener('click', async () => {
     showLoadingSpinner()
-    const removeCheck = await apiDeleteTodo(el.id)
-    hideLoadingSpinner()
-    if (removeCheck) {
-      removeElement(el.id)
-      renderTodos()
-    } else {
-      errorMessage.textContent = 'Failed to delete todo from the server'
-      renderTodos()
+    try {
+      const removeCheck = await apiDeleteTodo(el.id)
+      if (removeCheck) {
+        removeElement(todos, el.id)
+        renderTodos()
+      } else {
+        todoErrorMessage.textContent = 'Failed to delete todo from the server'
+      }
+    } finally {
+      hideLoadingSpinner()
     }
   })
 
@@ -117,77 +335,111 @@ function updateOverdueTask() {
     overdueMessage.style.display = 'none'
   }
 }
-let isAdding = false
+
 async function addNewElement() {
-  if (isAdding) return
+  if (isTodoPending) return
+  isTodoPending = true
+  addTodoButton.disabled = true
+  todoInput.disabled = true
+  dateInput.disabled = true
 
-  errorMessage.textContent = ''
-  input.classList.remove('input--error')
-  dateInput.classList.remove('input--error')
+  try {
+    todoErrorMessage.textContent = ''
+    todoInput.classList.remove('input--error')
+    dateInput.classList.remove('input--error')
 
-  const inputValue = input.value
-  const dueDateValue = dateInput.value
+    const inputValue = todoInput.value.trim()
+    const dueDateValue = dateInput.value
 
-  if (inputValue.trim() === '') {
-    input.classList.add('input--error')
-    dateInput.classList.add('input--error')
-    errorMessage.textContent = 'The input should not be empty !'
-    input.blur()
-    return
-  }
-
-  if (dueDateValue) {
-    const dateNow = getCurrentDate()
-    if (dueDateValue < dateNow) {
-      dateInput.classList.add('input--error')
-      input.classList.add('input--error')
-      errorMessage.textContent = 'Due date cannot be in the past !'
+    if (inputValue === '') {
+      todoInput.classList.add('input--error')
+      if (dueDateValue && dueDateValue < getCurrentDate()) {
+        dateInput.classList.add('input--error')
+        todoErrorMessage.textContent = 'The input and date are not valid'
+      } else {
+        todoErrorMessage.textContent = 'The input should not be empty !'
+      }
+      todoInput.blur()
       return
     }
-  }
-  const newTodoAPI = {
-    title: inputValue,
-    content: '',
-    done: false,
-    due_date: dueDateValue ? dueDateValue : null,
-  }
-  try {
-    isAdding = true
+
+    if (dueDateValue && dueDateValue < getCurrentDate()) {
+      dateInput.classList.add('input--error')
+      todoErrorMessage.textContent = 'Due date cannot be in the past !'
+      return
+    }
+
     showLoadingSpinner()
-    const createdTodo = await apiAddTodo(newTodoAPI)
+    const createdTodo = await apiAddTodo({
+      title: inputValue,
+      content: '',
+      done: false,
+      due_date: dueDateValue || null,
+    })
 
     if (createdTodo) {
       todos.push(createdTodo)
       renderTodos()
-      input.value = ''
+      todoInput.value = ''
       dateInput.value = ''
     } else {
-      errorMessage.textContent = 'Failed to save new todo to the server.'
+      todoErrorMessage.textContent = 'Failed to save new todo to the server.'
     }
   } catch (error) {
-    console.error('Failes to add task', error)
+    console.error('Failed to add task', error)
   } finally {
-    isAdding = false
+    isTodoPending = false
+    addTodoButton.disabled = false
+    todoInput.disabled = false
+    dateInput.disabled = false
     hideLoadingSpinner()
   }
 }
 
-function removeElement(id: number) {
-  const index = todos.findIndex((todo) => todo.id === id)
+function removeElement(element: Todo[] | Category[], id: number) {
+  const index = element.findIndex((el: Todo | Category) => el.id === id)
   if (index === -1) return
-  todos.splice(index, 1)
+  element.splice(index, 1)
 }
 
-async function clearElements() {
-  if (todos.length === 0) return
+async function clearElements(list: string) {
+  if (list === 'todos' && !todosLoaded) {
+    todoErrorMessage.textContent =
+      'Cannot clear todos: they were not loaded from the server.'
+    return
+  }
+  if (list === 'categories' && !categoriesLoaded) {
+    categoryErrorMessage.textContent =
+      'Cannot clear categories: they were not loaded from the server.'
+    return
+  }
+  if (list === 'todos' && todos.length === 0) return
+  if (list === 'categories' && categories.length === 0) return
+
   showLoadingSpinner()
-  const clearCheck = await apiClearTodo()
-  hideLoadingSpinner()
-  if (clearCheck) {
-    todos.splice(0, todos.length)
-    renderTodos()
+  try {
+    if (list === 'todos') {
+      const clearTodosCheck = await apiClearTodo()
+      if (clearTodosCheck) {
+        todos.splice(0, todos.length)
+        renderTodos()
+      }
+    }
+    if (list === 'categories') {
+      const clearCategoriesCheck = await clearCategories()
+      if (clearCategoriesCheck) {
+        categories.splice(0, categories.length)
+        resetEditedCategory()
+        renderCategories()
+      }
+    }
+  } finally {
+    hideLoadingSpinner()
   }
 }
+
+renderTodos()
+renderCategories()
 
 let lastKnownDate = getCurrentDate()
 window.addEventListener('focus', () => {
@@ -197,15 +449,34 @@ window.addEventListener('focus', () => {
     renderTodos()
   }
 })
-renderTodos()
 
-input.addEventListener('keydown', (e: KeyboardEvent) => {
+todoInput.addEventListener('keydown', (e: KeyboardEvent) => {
   if (e.key === 'Enter') {
     addNewElement()
   }
 })
-addButton.addEventListener('click', addNewElement)
 
-deleteAllButton.addEventListener('click', () => {
-  clearElements()
+addTodoButton.addEventListener('click', addNewElement)
+categoryInput.addEventListener('keydown', (e: KeyboardEvent) => {
+  if (e.key === 'Enter') {
+    if (isEditingCategory) {
+      editCategory()
+    } else {
+      addNewCategory()
+    }
+  }
+})
+addCategoryButton.addEventListener('click', () => {
+  if (isEditingCategory) {
+    editCategory()
+  } else {
+    addNewCategory()
+  }
+})
+
+deleteAllTodosButton.addEventListener('click', () => {
+  clearElements('todos')
+})
+deleteAllCategoriesButton.addEventListener('click', () => {
+  clearElements('categories')
 })

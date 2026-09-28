@@ -11,19 +11,35 @@
 
 <body>
   <main class="background">
-    <div class="todo-interface">
-      <h1>Web to-do list app</h1>
-      <p id="overdue-message"></p>
-      <div>
-        <p id="todo-error"></p>
-        <div class="input-container">
-          <input type="text" id="todo-input" name="input prompt" />
-          <input type="date" id="todo-date-input" />
-          <button type="button" id="add-todo-button" name="add button">add</button>
+    <h1>Web to-do list app</h1>
+    <div style="display: flex;">
+      <div class="interface">
+        <h2>Todos</h2>
+        <p id="overdue-message"></p>
+        <div>
+          <p id="todo-error"></p>
+          <div class="input-container">
+            <input type="text" id="todo-input" name="input prompt" />
+            <input type="date" id="todo-date-input" />
+            <button type="button" id="add-todo-button" name="add todo button">add</button>
+          </div>
         </div>
+        <ul id="todo-list" name="list of elements"></ul>
+        <button type="reset" id="delete-all-todos">Delete All</button>
       </div>
-      <ul id="todo-list" name="list of elements"></ul>
-      <button type="reset" id="delete-all">Delete All</button>
+      <div class="interface">
+        <h2>Categories</h2>
+        <div>
+          <p id="category-error"></p>
+          <div class="input-container">
+            <input type="text" id="category-name-input" name="input prompt" />
+            <input type="color" id="category-color-input" />
+            <button type="button" id="add-category-button" name="add category button">add</button>
+          </div>
+        </div>
+        <ul id="category-list" name="list of categories"></ul>
+        <button type="reset" id="delete-all-categories">Delete All</button>
+      </div>
     </div>
   </main>
   <script type="module" src="/src/main.ts"></script>

@@ -1,4 +1,7 @@
+let spinnerCount = 0
+
 export function showLoadingSpinner() {
+  spinnerCount++
   let overlay = document.querySelector<HTMLElement>('.loading-overlay')
 
   if (!overlay) {
@@ -15,6 +18,8 @@ export function showLoadingSpinner() {
 }
 
 export function hideLoadingSpinner() {
+  spinnerCount = Math.max(0, spinnerCount - 1)
+  if (spinnerCount > 0) return
   const overlay = document.querySelector<HTMLElement>('.loading-overlay')
   if (overlay) {
     overlay.style.display = 'none'
