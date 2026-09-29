@@ -23,4 +23,5 @@ export const elements = {
   deleteAllCategoriesButton: checkNull<HTMLButtonElement>(
     '#delete-all-categories',
   ),
+  todoCategoryInput: checkNull<HTMLSelectElement>('#todo-category-input'),
 }

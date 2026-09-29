@@ -17,3 +17,8 @@ export interface CategoryUpdate {
   title?: string
   color?: string
 }
+
+export interface Category_Todo {
+  category_id: number
+  todo_id: number
+}
