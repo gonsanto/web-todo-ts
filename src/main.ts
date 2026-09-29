@@ -8,7 +8,6 @@ import {
 } from './categoriesApi.ts'
 import {
   addApiCategoriesTodos,
-  clearApiCategoriesTodos,
   getApiCategoriesTodos,
 } from './categoriesTodoApi.ts'
 import { getCurrentDate, getDueDateStatus } from './date.ts'
@@ -54,7 +53,6 @@ const renderCategories = () => {
     'hidden',
     empty || !categoriesLoaded,
   )
-
   renderCategoryOptions()
 }
 
@@ -111,9 +109,13 @@ const addCategory = (el: Category) => {
     try {
       const removeCheck = await deleteApiCategories(el.id)
       if (removeCheck) {
+        categoriesTodos = categoriesTodos.filter(
+          (ct) => ct.category_id !== el.id,
+        )
         removeElement(categories, el.id)
         if (editedCategoryId === el.id) resetEditedCategory()
         renderCategories()
+        renderTodos()
       } else {
         categoryErrorMessage.textContent =
           'Failed to delete category from the server'
@@ -545,16 +547,14 @@ async function clearElements(list: 'todos' | 'categories') {
   try {
     if (list === 'todos') {
       const clearTodosCheck = await apiClearTodo()
-      const clearCategoryTodoCheck = await clearApiCategoriesTodos()
 
-      if (clearTodosCheck) todos.splice(0, todos.length)
-      if (clearCategoryTodoCheck)
+      if (clearTodosCheck) {
+        todos.splice(0, todos.length)
         categoriesTodos.splice(0, categoriesTodos.length)
-
-      if (!clearTodosCheck || !clearCategoryTodoCheck) {
-        todoErrorMessage.textContent =
-          'Failed to clear some todos from the server.'
+      } else {
+        todoErrorMessage.textContent = 'Failed to clear todos from the server.'
       }
+      renderTodos()
     }
     if (list === 'categories') {
       const clearCategoriesCheck = await clearCategories()
@@ -563,8 +563,8 @@ async function clearElements(list: 'todos' | 'categories') {
         categoriesTodos.splice(0, categoriesTodos.length)
         resetEditedCategory()
         renderCategories()
+        renderTodos()
       }
-      renderTodos()
     }
   } finally {
     hideLoadingSpinner()

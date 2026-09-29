@@ -36,18 +36,3 @@ export async function addApiCategoriesTodos(
     return null
   }
 }
-
-export async function clearApiCategoriesTodos(): Promise<boolean> {
-  try {
-    const response = await fetch(`${url}categories_todos`, {
-      method: 'DELETE',
-    })
-    if (!response.ok) {
-      throw new Error(`Failed to clear categories-todos: ${response.status}`)
-    }
-    return true
-  } catch (error) {
-    console.error('API Delete error:', error)
-    return false
-  }
-}
