@@ -10,6 +10,7 @@ import {
   addApiCategoriesTodos,
   getApiCategoriesTodos,
 } from './categoriesTodoApi.ts'
+import { constants } from './constants.ts'
 import { getCurrentDate, getDueDateStatus } from './date.ts'
 import { elements } from './dom.ts'
 import {
@@ -38,19 +39,45 @@ const {
   deleteAllTodosButton,
   deleteAllCategoriesButton,
 } = elements
-colorInput.value = '#f9f9f9'
+
+const {
+  baseCategoryColor,
+  baseColorInputValue,
+  baseCategoryTodoBackgroundColor,
+  addButtonText,
+  editButtonText,
+  saveButtonText,
+  removeButtonText,
+  categoryTodoInputText,
+  emptyValue,
+  isHiddenClass,
+  inputErrorClass,
+  isEditingClass,
+  overdueTaskClass,
+  noDueDateText,
+  categoryElText,
+  hasAssignedCategoryClass,
+  noAssignedCategoryClass,
+  overdueMessageText,
+  invalid,
+  failedTo,
+  canNotClear,
+  keyboardKey,
+} = constants
+
+colorInput.value = baseColorInputValue
 
 let categoriesLoaded = false
 const renderCategories = () => {
-  categoryList.innerHTML = ''
+  categoryList.innerHTML = emptyValue
   categories.forEach((Category) => {
     addCategory(Category)
   })
 
   const empty = categories.length === 0
-  categoryList.classList.toggle('hidden', empty)
+  categoryList.classList.toggle(isHiddenClass, empty)
   deleteAllCategoriesButton.classList.toggle(
-    'hidden',
+    isHiddenClass,
     empty || !categoriesLoaded,
   )
   renderCategoryOptions()
@@ -62,8 +89,7 @@ try {
   categories = await getApiCategories()
   categoriesLoaded = true
 } catch {
-  categoryErrorMessage.textContent =
-    'Failed to load categories from the server. Please try again later.'
+  categoryErrorMessage.textContent = failedTo.load.category
 } finally {
   hideLoadingSpinner()
 }
@@ -77,29 +103,28 @@ const addCategory = (el: Category) => {
   const category = document.createElement('li')
   category.id = `categories-elements-${el.id}`
   category.style.backgroundColor = el.color
-  category.style.borderColor = el.color
+  category.style.borderColor =
+    el.color === baseColorInputValue ? emptyValue : el.color
 
   const textSpan = document.createElement('span')
   textSpan.textContent = el.title
 
   const editButton = document.createElement('button')
-  editButton.textContent = 'edit'
-  editButton.style.cursor = 'pointer'
+  editButton.textContent = editButtonText
 
   const removeButton = document.createElement('button')
-  removeButton.textContent = '🗑'
-  removeButton.style.cursor = 'pointer'
+  removeButton.textContent = removeButtonText
 
   editButton.addEventListener('click', () => {
     categoryList.querySelectorAll('li').forEach((li) => {
-      li.classList.remove('editing')
+      li.classList.remove(isEditingClass)
     })
-    category.classList.add('editing')
+    category.classList.add(isEditingClass)
 
     editedCategoryId = el.id
     categoryInput.value = el.title
     colorInput.value = el.color
-    addCategoryButton.textContent = 'save'
+    addCategoryButton.textContent = saveButtonText
     isEditingCategory = true
     categoryInput.focus()
   })
@@ -117,8 +142,7 @@ const addCategory = (el: Category) => {
         renderCategories()
         renderTodos()
       } else {
-        categoryErrorMessage.textContent =
-          'Failed to delete category from the server'
+        categoryErrorMessage.textContent = failedTo.delete.category
       }
     } finally {
       hideLoadingSpinner()
@@ -139,15 +163,15 @@ const addNewCategory = async () => {
   colorInput.disabled = true
 
   try {
-    categoryErrorMessage.textContent = ''
-    categoryInput.classList.remove('input--error')
+    categoryErrorMessage.textContent = emptyValue
+    categoryInput.classList.remove(inputErrorClass)
 
     const categoryValue = categoryInput.value.trim()
     const colorValue = colorInput.value
 
-    if (categoryValue === '') {
-      categoryInput.classList.add('input--error')
-      categoryErrorMessage.textContent = 'The input should not be empty !'
+    if (categoryValue === emptyValue) {
+      categoryInput.classList.add(inputErrorClass)
+      categoryErrorMessage.textContent = invalid.textInput
       return
     }
 
@@ -160,14 +184,13 @@ const addNewCategory = async () => {
     if (createdCategory) {
       categories.push(createdCategory)
       renderCategories()
-      categoryInput.value = ''
-      colorInput.value = '#f9f9f9'
+      categoryInput.value = emptyValue
+      colorInput.value = baseColorInputValue
     } else {
-      categoryErrorMessage.textContent =
-        'Failed to save new category to the server.'
+      categoryErrorMessage.textContent = failedTo.save.category
     }
   } catch (error) {
-    console.error('Failed to add category', error)
+    console.error(failedTo.error.addCategory, error)
   } finally {
     isCategoryPending = false
     addCategoryButton.disabled = false
@@ -186,15 +209,15 @@ async function editCategory() {
   colorInput.disabled = true
 
   try {
-    categoryErrorMessage.textContent = ''
-    categoryInput.classList.remove('input--error')
+    categoryErrorMessage.textContent = emptyValue
+    categoryInput.classList.remove(inputErrorClass)
 
     const categoryValue = categoryInput.value.trim()
     const colorValue = colorInput.value
 
-    if (categoryValue === '') {
-      categoryInput.classList.add('input--error')
-      categoryErrorMessage.textContent = 'The input should not be empty !'
+    if (categoryValue === emptyValue) {
+      categoryInput.classList.add(inputErrorClass)
+      categoryErrorMessage.textContent = invalid.textInput
       return
     }
 
@@ -214,11 +237,10 @@ async function editCategory() {
       renderTodos()
       resetEditedCategory()
     } else {
-      categoryErrorMessage.textContent =
-        'Failed to update category on the server.'
+      categoryErrorMessage.textContent = failedTo.update.category
     }
   } catch (error) {
-    console.error('Failed to edit category:', error)
+    console.error(failedTo.error.editCategory, error)
   } finally {
     isCategoryPending = false
     addCategoryButton.disabled = false
@@ -229,9 +251,9 @@ async function editCategory() {
 }
 
 function resetEditedCategory() {
-  categoryInput.value = ''
-  colorInput.value = '#f9f9f9'
-  addCategoryButton.textContent = 'add'
+  categoryInput.value = emptyValue
+  colorInput.value = baseColorInputValue
+  addCategoryButton.textContent = addButtonText
   isEditingCategory = false
   editedCategoryId = null
 }
@@ -243,8 +265,7 @@ try {
   categoriesTodos = await getApiCategoriesTodos()
   categoriesTodosLoaded = true
 } catch {
-  todoErrorMessage.textContent =
-    'Failed to load categories todos from the server. Please try again later.'
+  todoErrorMessage.textContent = failedTo.load.categoryTodo
 } finally {
   hideLoadingSpinner()
 }
@@ -252,8 +273,7 @@ try {
 function renderCategoryOptions() {
   const previous = todoCategoryInput.value
 
-  todoCategoryInput.innerHTML =
-    '<option value="">--Assign a Category--</option>'
+  todoCategoryInput.innerHTML = `<option value="">${categoryTodoInputText}</option>`
   categories.forEach((category) => {
     const option = document.createElement('option')
     option.value = `${category.id}`
@@ -264,7 +284,7 @@ function renderCategoryOptions() {
 
   const stillValid =
     previous && categories.some((c) => String(c.id) === previous)
-  todoCategoryInput.value = stillValid ? previous : ''
+  todoCategoryInput.value = stillValid ? previous : emptyValue
 
   applyCategoryInputColor()
 }
@@ -277,26 +297,24 @@ try {
   todosLoaded = true
 } catch {
   if (!categoriesTodosLoaded) {
-    todoErrorMessage.textContent =
-      'Failed to load todos and categories todos from the server. Please try again later.'
+    todoErrorMessage.textContent = failedTo.load.anyTodo
   } else {
-    todoErrorMessage.textContent =
-      'Failed to load todos from the server. Please try again later.'
+    todoErrorMessage.textContent = failedTo.load.todo
   }
 } finally {
   hideLoadingSpinner()
 }
 
 function renderTodos() {
-  todoList.innerHTML = ''
+  todoList.innerHTML = emptyValue
   todos.forEach((Todo) => {
     addTask(Todo)
   })
   updateOverdueTask()
 
   const empty = todos.length === 0
-  todoList.classList.toggle('hidden', empty)
-  deleteAllTodosButton.classList.toggle('hidden', empty || !todosLoaded)
+  todoList.classList.toggle(isHiddenClass, empty)
+  deleteAllTodosButton.classList.toggle(isHiddenClass, empty || !todosLoaded)
 }
 
 function addTask(el: Todo) {
@@ -311,8 +329,7 @@ function addTask(el: Todo) {
   textSpan.textContent = el.title
 
   const removeButton = document.createElement('button')
-  removeButton.textContent = '🗑'
-  removeButton.style.cursor = 'pointer'
+  removeButton.textContent = removeButtonText
 
   const dateEl = createDateElement(el)
   const categoryEl = applyCategoryElement(el, todoElements)
@@ -328,7 +345,7 @@ function addTask(el: Todo) {
         updateOverdueTask()
       } else if (checkbox.checked === submit) {
         checkbox.checked = !submit
-        todoErrorMessage.textContent = 'Failed to update todo from the server'
+        todoErrorMessage.textContent = failedTo.update.todo
       }
     } finally {
       checkbox.disabled = false
@@ -347,7 +364,7 @@ function addTask(el: Todo) {
         ) //filter out the categorie-todo along with the deleted todo
         renderTodos()
       } else {
-        todoErrorMessage.textContent = 'Failed to delete todo from the server'
+        todoErrorMessage.textContent = failedTo.delete.todo
       }
     } finally {
       hideLoadingSpinner()
@@ -367,7 +384,7 @@ function addTask(el: Todo) {
 function createDateElement(el: Todo) {
   if (!el.due_date) {
     const noDueDate = document.createElement('p')
-    noDueDate.textContent = 'no due date'
+    noDueDate.textContent = noDueDateText
     return noDueDate
   }
 
@@ -388,20 +405,20 @@ function applyCategoryElement(el: Todo, todoElements: HTMLElement) {
   if (category) {
     const categoryColor = category.color
 
-    categoryEl.classList.add('category-todos')
+    categoryEl.classList.add(hasAssignedCategoryClass)
     categoryEl.textContent = category.title
-    if (categoryColor === '#f9f9f9') {
-      categoryEl.style.borderColor = '#ddd'
-      categoryEl.style.background = '#ddd'
-      todoElements.style.borderColor = '#ddd'
+    if (categoryColor === baseColorInputValue) {
+      categoryEl.style.borderColor = baseCategoryColor
+      categoryEl.style.background = baseCategoryColor
+      todoElements.style.borderColor = baseCategoryColor
     } else {
       categoryEl.style.borderColor = categoryColor
       categoryEl.style.background = categoryColor
       todoElements.style.borderColor = categoryColor
     }
   } else {
-    categoryEl.textContent = 'no category'
-    categoryEl.classList.add('no-category')
+    categoryEl.textContent = categoryElText
+    categoryEl.classList.add(noAssignedCategoryClass)
   }
 
   return categoryEl
@@ -410,20 +427,18 @@ function applyCategoryElement(el: Todo, todoElements: HTMLElement) {
 function updateOverdueTask() {
   const hasOverdueTasks = todos.some(
     (todo) =>
-      !todo.done && getDueDateStatus(todo.due_date) === 'due-date--overdue',
+      !todo.done && getDueDateStatus(todo.due_date) === overdueTaskClass,
   )
-  overdueMessage.textContent = hasOverdueTasks
-    ? 'Attention: You have overdue tasks that require your immediate attention!'
-    : ''
-  overdueMessage.classList.toggle('hidden', !hasOverdueTasks)
+  overdueMessage.textContent = hasOverdueTasks ? overdueMessageText : emptyValue
+  overdueMessage.classList.toggle(isHiddenClass, !hasOverdueTasks)
 }
 
 function applyCategoryInputColor() {
   const selectedId = todoCategoryInput.value
 
-  if (selectedId === '') {
-    todoCategoryInput.style.backgroundColor = ''
-    todoCategoryInput.style.color = ''
+  if (selectedId === emptyValue) {
+    todoCategoryInput.style.backgroundColor = emptyValue
+    todoCategoryInput.style.color = emptyValue
     return
   }
   const category = categories.find(
@@ -431,12 +446,10 @@ function applyCategoryInputColor() {
   )
   if (!category) return
 
-  if (category.color === '#f9f9f9') {
-    todoCategoryInput.style.backgroundColor = ''
-    todoCategoryInput.style.color = 'black'
+  if (category.color === baseColorInputValue) {
+    todoCategoryInput.style.backgroundColor = baseCategoryTodoBackgroundColor
   } else {
     todoCategoryInput.style.backgroundColor = category.color
-    todoCategoryInput.style.color = 'white'
   }
 }
 
@@ -449,36 +462,36 @@ async function addNewElement() {
   todoCategoryInput.disabled = true
 
   try {
-    todoErrorMessage.textContent = ''
-    todoInput.classList.remove('input--error')
-    dateInput.classList.remove('input--error')
+    todoErrorMessage.textContent = emptyValue
+    todoInput.classList.remove(inputErrorClass)
+    dateInput.classList.remove(inputErrorClass)
 
     const inputValue = todoInput.value.trim()
     const dueDateValue = dateInput.value
     const categoryIdValue = todoCategoryInput.value
 
-    if (inputValue === '') {
-      todoInput.classList.add('input--error')
+    if (inputValue === emptyValue) {
+      todoInput.classList.add(inputErrorClass)
       if (dueDateValue && dueDateValue < getCurrentDate()) {
-        dateInput.classList.add('input--error')
-        todoErrorMessage.textContent = 'The input and date are not valid'
+        dateInput.classList.add(inputErrorClass)
+        todoErrorMessage.textContent = invalid.inputs
       } else {
-        todoErrorMessage.textContent = 'The input should not be empty !'
+        todoErrorMessage.textContent = invalid.textInput
       }
       todoInput.blur()
       return
     }
 
     if (dueDateValue && dueDateValue < getCurrentDate()) {
-      dateInput.classList.add('input--error')
-      todoErrorMessage.textContent = 'Due date cannot be in the past !'
+      dateInput.classList.add(inputErrorClass)
+      todoErrorMessage.textContent = invalid.dateInput
       return
     }
 
     showLoadingSpinner()
     const createdTodo = await apiAddTodo({
       title: inputValue,
-      content: '',
+      content: emptyValue,
       done: false,
       due_date: dueDateValue || null,
     })
@@ -492,20 +505,19 @@ async function addNewElement() {
         if (assignedCategory) {
           categoriesTodos.push(assignedCategory)
         } else {
-          todoErrorMessage.textContent =
-            'Todo created, but failed to assign the category'
+          todoErrorMessage.textContent = failedTo.error.assignCategory
         }
       }
       todos.push(createdTodo)
       renderTodos()
-      todoCategoryInput.value = ''
-      todoInput.value = ''
-      dateInput.value = ''
+      todoCategoryInput.value = emptyValue
+      todoInput.value = emptyValue
+      dateInput.value = emptyValue
     } else {
-      todoErrorMessage.textContent = 'Failed to save new todo to the server.'
+      todoErrorMessage.textContent = failedTo.save.todo
     }
   } catch (error) {
-    console.error('Failed to add task', error)
+    console.error(failedTo.error.addTodo, error)
   } finally {
     isTodoPending = false
     addTodoButton.disabled = false
@@ -523,48 +535,50 @@ function removeElement(element: Todo[] | Category[], id: number) {
 }
 
 async function clearElements(list: 'todos' | 'categories') {
-  if (list === 'todos') {
+  const todosList = 'todos'
+  const categoriesList = 'categories'
+
+  if (list === todosList) {
     if (!todosLoaded) {
-      todoErrorMessage.textContent =
-        'Cannot clear todos: they were not loaded from the server.'
+      todoErrorMessage.textContent = canNotClear.todos
       return
     }
     if (!categoriesTodosLoaded) {
-      todoErrorMessage.textContent =
-        'Cannot clear todos: linked todos were not loaded from the server'
+      todoErrorMessage.textContent = canNotClear.categoryTodos
       return
     }
   }
-  if (list === 'categories' && !categoriesLoaded) {
-    categoryErrorMessage.textContent =
-      'Cannot clear categories: they were not loaded from the server.'
+  if (list === categoriesList && !categoriesLoaded) {
+    categoryErrorMessage.textContent = canNotClear.categories
     return
   }
-  if (list === 'todos' && todos.length === 0) return
-  if (list === 'categories' && categories.length === 0) return
+  if (list === todosList && todos.length === 0) return
+  if (list === categoriesList && categories.length === 0) return
 
   showLoadingSpinner()
   try {
-    if (list === 'todos') {
+    if (list === todosList) {
       const clearTodosCheck = await apiClearTodo()
 
       if (clearTodosCheck) {
         todos.splice(0, todos.length)
         categoriesTodos.splice(0, categoriesTodos.length)
       } else {
-        todoErrorMessage.textContent = 'Failed to clear todos from the server.'
+        todoErrorMessage.textContent = failedTo.clear.todo
       }
       renderTodos()
     }
-    if (list === 'categories') {
+    if (list === categoriesList) {
       const clearCategoriesCheck = await clearCategories()
       if (clearCategoriesCheck) {
         categories.splice(0, categories.length)
         categoriesTodos.splice(0, categoriesTodos.length)
         resetEditedCategory()
-        renderCategories()
-        renderTodos()
+      } else {
+        categoryErrorMessage.textContent = failedTo.clear.category
       }
+      renderCategories()
+      renderTodos()
     }
   } finally {
     hideLoadingSpinner()
@@ -585,14 +599,14 @@ window.addEventListener('focus', () => {
 todoCategoryInput.addEventListener('change', applyCategoryInputColor)
 
 todoInput.addEventListener('keydown', (e: KeyboardEvent) => {
-  if (e.key === 'Enter') {
+  if (e.key === keyboardKey.enter) {
     addNewElement()
   }
 })
 
 addTodoButton.addEventListener('click', addNewElement)
 categoryInput.addEventListener('keydown', (e: KeyboardEvent) => {
-  if (e.key === 'Enter') {
+  if (e.key === keyboardKey.enter) {
     if (isEditingCategory) {
       editCategory()
     } else {

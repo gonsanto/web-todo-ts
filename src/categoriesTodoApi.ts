@@ -32,7 +32,7 @@ export async function addApiCategoriesTodos(
     const data = await response.json()
     return Array.isArray(data) ? data[0] : data
   } catch (error) {
-    console.error('Category add error:', error)
+    console.error('Category-todo add error:', error)
     return null
   }
 }

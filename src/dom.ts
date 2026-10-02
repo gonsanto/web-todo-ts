@@ -24,4 +24,4 @@ export const elements = {
     '#delete-all-categories',
   ),
   todoCategoryInput: checkNull<HTMLSelectElement>('#todo-category-input'),
-}
+} as const

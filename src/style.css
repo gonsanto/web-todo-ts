@@ -104,10 +104,6 @@ li input {
   width: fit-content;
 }
 
-#todo-date-input::-webkit-datetime-edit {
-  display: none;
-}
-
 li time,
 li p,
 .no-category {
