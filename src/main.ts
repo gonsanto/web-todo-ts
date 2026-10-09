@@ -383,17 +383,26 @@ function addTask(el: Todo) {
   todoElements.appendChild(removeButton)
   todoList.appendChild(todoElements)
 }
+
+const commitPendingTodos = () => {
+  if (pendingDeletes.length === 0) return
+
+  const toCommit = pendingDeletes
+  pendingDeletes = []
+  hideUndoToast()
+
+  for (const pending of toCommit) {
+    window.clearTimeout(pending.timerId)
+    void commitDelete(pending)
+  }
+}
+
 async function scheduleDelete(
   todosToDelete: Todo[],
   toastLabel: string,
   categoryEl?: HTMLElement,
 ) {
-  // Fast-forward any previous pending delete
-  for (const pending of pendingDeletes) {
-    window.clearTimeout(pending.timerId)
-    await commitDelete(pending)
-  }
-  pendingDeletes = []
+  commitPendingTodos() // Fast-forward any previous pending delete
 
   const idsToDelete = todosToDelete.map((todo) => todo.id)
   const isBeingDeleted = (id: number) => idsToDelete.includes(id)
@@ -487,6 +496,7 @@ function hideUndoToast() {
 
   hideToastListener = (event: AnimationEvent) => {
     if (event.animationName !== 'toast-out') return
+    if (!toast.classList.contains(isHiddenToastClass)) return
     if (hideToastListener) {
       toast.removeEventListener('animationend', hideToastListener)
       hideToastListener = null
@@ -586,7 +596,11 @@ function applyCategoryInputColor() {
 
 async function addNewElement() {
   if (isTodoPending) return
+
+  commitPendingTodos() //
+
   isTodoPending = true
+
   addTodoButton.disabled = true
   todoInput.disabled = true
   dateInput.disabled = true
@@ -714,6 +728,13 @@ todoInput.addEventListener('keydown', (e: KeyboardEvent) => {
 })
 
 addTodoButton.addEventListener('click', addNewElement)
+addCategoryButton.addEventListener('click', () => {
+  if (isEditingCategory) {
+    editCategory()
+  } else {
+    addNewCategory()
+  }
+})
 categoryInput.addEventListener('keydown', (e: KeyboardEvent) => {
   if (e.key === keyboardKey.enter) {
     if (isEditingCategory) {
@@ -721,13 +742,6 @@ categoryInput.addEventListener('keydown', (e: KeyboardEvent) => {
     } else {
       addNewCategory()
     }
-  }
-})
-addCategoryButton.addEventListener('click', () => {
-  if (isEditingCategory) {
-    editCategory()
-  } else {
-    addNewCategory()
   }
 })
 
@@ -745,4 +759,10 @@ toastButton.addEventListener('click', () => {
 
 dismissToastButton.addEventListener('click', () => {
   hideUndoToast()
+})
+
+window.addEventListener('beforeunload', (e) => {
+  if (pendingDeletes.length > 0) {
+    e.preventDefault()
+  }
 })

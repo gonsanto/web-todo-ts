@@ -5,6 +5,7 @@ html,
   padding: 0;
   margin: 0;
   box-sizing: border-box;
+  word-break: break-all;
 }
 
 h1,
@@ -111,6 +112,7 @@ li p,
   font-size: 0.8rem;
   color: #808080;
   margin-left: 1rem;
+  min-width: fit-content;
 }
 
 li span {
@@ -205,6 +207,7 @@ li span {
   border: 0.2rem solid;
   border-radius: 0.4rem;
   padding: 0.2rem;
+  min-width: fit-content;
 }
 
 .no-category {
@@ -227,6 +230,7 @@ li span {
   background: #f9f9f9;
   color: black;
   overflow: hidden;
+  max-width: 50%;
   padding: 1.5rem 1rem;
   border-radius: 0.5rem;
   box-shadow: 0 0.5rem 1.5rem rgba(0, 0, 0, 0.4);
@@ -260,6 +264,10 @@ li span {
     opacity: 0;
     bottom: 0rem;
   }
+}
+
+#toast-message {
+  word-break: break-word;
 }
 
 #toast-button {
