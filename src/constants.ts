@@ -2,7 +2,7 @@ export const constants = {
   emptyValue: '',
   baseCategoryColor: '#ddd',
   baseColorInputValue: '#f9f9f9',
-  baseCategoryTodoBackgroundColor: '',
+  baseCategoryTodoBackgroundColor: 'white',
 
   addButtonText: 'add',
   editButtonText: 'edit',
@@ -13,11 +13,18 @@ export const constants = {
   noDueDateText: 'no due date',
   categoryElText: 'no category',
 
+  toastMessageText: ' deleted',
+  toastDeleteAllText: 'tasks',
+  toastButtonText: '↺',
+  dismissToastButtonText: '✕',
+  toastDeleteTimer: 4000,
+
   noAssignedCategoryClass: 'no-category',
   hasAssignedCategoryClass: 'category-todos',
   overdueTaskClass: 'due-date--overdue',
   isHiddenClass: 'hidden',
   isEditingClass: 'editing',
+  isHiddenToastClass: 'hide-toast',
 
   inputErrorClass: 'input--error',
   overdueMessageText: 'Attention: You have overdue tasks that are undone !',

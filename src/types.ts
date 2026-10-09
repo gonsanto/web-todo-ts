@@ -22,3 +22,10 @@ export interface Category_Todo {
   category_id: number
   todo_id: number
 }
+
+export interface PendingDelete {
+  type: 'single' | 'all'
+  todos: Todo[]
+  assignedTodo: Category_Todo[]
+  timerId: number
+}

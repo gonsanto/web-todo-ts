@@ -4,6 +4,7 @@ html,
   text-align: center;
   padding: 0;
   margin: 0;
+  box-sizing: border-box;
 }
 
 h1,
@@ -109,7 +110,7 @@ li p,
 .no-category {
   font-size: 0.8rem;
   color: #808080;
-  margin-left: auto;
+  margin-left: 1rem;
 }
 
 li span {
@@ -167,7 +168,7 @@ li span {
   display: flex;
   justify-content: center;
   align-items: center;
-  z-index: 1;
+  z-index: 2;
 }
 
 .spinner {
@@ -198,10 +199,6 @@ li span {
   outline: 2px solid rgb(53, 132, 228);
 }
 
-.hidden {
-  display: none;
-}
-
 .category-todos {
   margin: 0;
   font-size: 0.8rem;
@@ -219,4 +216,81 @@ li span {
   width: fit-content;
   background: white;
   padding: 0.2rem 0rem 0.1rem 0.5rem;
+}
+
+.toast {
+  position: fixed;
+  bottom: 5rem;
+  display: flex;
+  align-items: center;
+  gap: 0rem;
+  background: #f9f9f9;
+  color: black;
+  overflow: hidden;
+  padding: 1.5rem 1rem;
+  border-radius: 0.5rem;
+  box-shadow: 0 0.5rem 1.5rem rgba(0, 0, 0, 0.4);
+  z-index: 1;
+  animation: toast-in 0.5s ease-out;
+}
+
+.hide-toast {
+  animation: toast-out 0.5s;
+}
+
+@keyframes toast-in {
+  0% {
+    bottom: 0;
+    opacity: 0;
+  }
+
+  100% {
+    bottom: 5rem;
+    opacity: 1;
+  }
+}
+
+@keyframes toast-out {
+  0% {
+    opacity: 1;
+    bottom: 5rem;
+  }
+
+  100% {
+    opacity: 0;
+    bottom: 0rem;
+  }
+}
+
+#toast-button {
+  background: transparent;
+  border: none;
+  font-weight: bold;
+  font-size: 1rem;
+}
+
+#dismiss-toast-button {
+  background: transparent;
+  border: none;
+  font-size: 1rem;
+}
+
+#toast-progress {
+  background: red;
+  position: absolute;
+  height: 0.25rem;
+  width: 100%;
+  left: 0rem;
+  bottom: 0rem;
+  border-radius: 0 0 0.5rem 0.5rem;
+}
+
+@keyframes toast-progress-countdown {
+  to {
+    width: 0%;
+  }
+}
+
+.hidden {
+  display: none;
 }
