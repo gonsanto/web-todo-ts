@@ -20,7 +20,7 @@ import {
   apiUpdateTodo,
   getStoredTodos,
 } from './todoApi.ts'
-import type { Category, Category_Todo, Todo } from './types.ts'
+import type { Category, Category_Todo, PendingDelete, Todo } from './types.ts'
 import { hideLoadingSpinner, showLoadingSpinner } from './updateUi.ts'
 
 const {
@@ -38,6 +38,11 @@ const {
   overdueMessage,
   deleteAllTodosButton,
   deleteAllCategoriesButton,
+  toast,
+  toastMessage,
+  toastButton,
+  dismissToastButton,
+  toastProgress,
 } = elements
 
 const {
@@ -48,6 +53,12 @@ const {
   editButtonText,
   saveButtonText,
   removeButtonText,
+  toastMessageText,
+  toastButtonText,
+  toastDeleteAllText,
+  dismissToastButtonText,
+  toastDeleteTimer,
+  isHiddenToastClass,
   categoryTodoInputText,
   emptyValue,
   isHiddenClass,
@@ -66,6 +77,8 @@ const {
 } = constants
 
 colorInput.value = baseColorInputValue
+toastButton.textContent = toastButtonText
+dismissToastButton.textContent = dismissToastButtonText
 
 let categoriesLoaded = false
 const renderCategories = () => {
@@ -78,8 +91,8 @@ const renderCategories = () => {
   categoryList.classList.toggle(isHiddenClass, empty)
   deleteAllCategoriesButton.classList.toggle(
     isHiddenClass,
-    empty || !categoriesLoaded,
-  )
+    !categoriesLoaded || categories.length <= 1,
+  ) // Hide "Delete All when there is less than 1 todo"
   renderCategoryOptions()
 }
 
@@ -131,6 +144,7 @@ const addCategory = (el: Category) => {
 
   removeButton.addEventListener('click', async () => {
     showLoadingSpinner()
+
     try {
       const removeCheck = await deleteApiCategories(el.id)
       if (removeCheck) {
@@ -314,7 +328,10 @@ function renderTodos() {
 
   const empty = todos.length === 0
   todoList.classList.toggle(isHiddenClass, empty)
-  deleteAllTodosButton.classList.toggle(isHiddenClass, empty || !todosLoaded)
+  deleteAllTodosButton.classList.toggle(
+    isHiddenClass,
+    !todosLoaded || todos.length <= 1,
+  ) // Hide "Delete All when there is less than 1 todo"
 }
 
 function addTask(el: Todo) {
@@ -354,21 +371,7 @@ function addTask(el: Todo) {
   })
 
   removeButton.addEventListener('click', async () => {
-    showLoadingSpinner()
-    try {
-      const removeCheck = await apiDeleteTodo(el.id)
-      if (removeCheck) {
-        removeElement(todos, el.id)
-        categoriesTodos = categoriesTodos.filter(
-          (CategoryTodo) => CategoryTodo.todo_id !== el.id,
-        ) //filter out the categorie-todo along with the deleted todo
-        renderTodos()
-      } else {
-        todoErrorMessage.textContent = failedTo.delete.todo
-      }
-    } finally {
-      hideLoadingSpinner()
-    }
+    await scheduleDelete([el], el.title, categoryEl)
   })
 
   todoElements.appendChild(checkbox)
@@ -379,6 +382,145 @@ function addTask(el: Todo) {
   }
   todoElements.appendChild(removeButton)
   todoList.appendChild(todoElements)
+}
+
+const commitPendingTodos = () => {
+  if (pendingDeletes.length === 0) return
+
+  const toCommit = pendingDeletes
+  pendingDeletes = []
+  hideUndoToast()
+
+  for (const pending of toCommit) {
+    window.clearTimeout(pending.timerId)
+    void commitDelete(pending)
+  }
+}
+
+async function scheduleDelete(
+  todosToDelete: Todo[],
+  toastLabel: string,
+  categoryEl?: HTMLElement,
+) {
+  commitPendingTodos() // Fast-forward any previous pending delete
+
+  const idsToDelete = todosToDelete.map((todo) => todo.id)
+  const isBeingDeleted = (id: number) => idsToDelete.includes(id)
+
+  const entry: PendingDelete = {
+    type: todosToDelete.length > 1 ? 'all' : 'single',
+    todos: todosToDelete,
+    assignedTodo: categoriesTodos.filter((ct) => isBeingDeleted(ct.todo_id)),
+    timerId: 0,
+  }
+
+  todos = todos.filter((todo) => !isBeingDeleted(todo.id))
+  categoriesTodos = categoriesTodos.filter((ct) => !isBeingDeleted(ct.todo_id))
+  renderTodos()
+
+  showUndoToast(toastLabel, () => undoDelete(entry), categoryEl)
+
+  entry.timerId = window.setTimeout(async () => {
+    pendingDeletes = pendingDeletes.filter((pD) => pD !== entry)
+    hideUndoToast()
+    await commitDelete(entry)
+  }, toastDeleteTimer)
+
+  pendingDeletes.push(entry)
+}
+
+let pendingDeletes: PendingDelete[] = []
+let currentUndoHandler: (() => void) | null = null
+let hideToastListener: ((e: AnimationEvent) => void) | null
+
+async function commitDelete(entry: PendingDelete) {
+  showLoadingSpinner()
+  try {
+    if (entry.type === 'all') {
+      const ok = await apiClearTodo()
+      if (!ok) {
+        todos.push(...entry.todos)
+        categoriesTodos.push(...entry.assignedTodo)
+        todoErrorMessage.textContent = failedTo.clear.todo
+      }
+    } else {
+      const todo = entry.todos[0]
+      const ok = await apiDeleteTodo(todo.id)
+      if (!ok) {
+        todos.push(todo)
+        categoriesTodos.push(...entry.assignedTodo)
+        todoErrorMessage.textContent = failedTo.delete.todo
+      }
+    }
+  } finally {
+    hideLoadingSpinner()
+    renderTodos()
+  }
+}
+
+function showUndoToast(
+  toastLabel: string,
+  onUndo: () => void,
+  categoryEl?: HTMLElement,
+) {
+  if (hideToastListener) {
+    toast.removeEventListener('animationend', hideToastListener)
+    hideToastListener = null
+  }
+  toast.classList.remove(isHiddenToastClass)
+  toastMessage.textContent = emptyValue
+
+  if (categoryEl) {
+    toastMessage.append(categoryEl.cloneNode(true), ' ')
+  }
+  toastMessage.append(toastLabel, toastMessageText)
+
+  currentUndoHandler = onUndo
+  toastButton.disabled = false
+  dismissToastButton.disabled = false
+  toast.classList.remove(isHiddenClass)
+
+  toastProgress.style.animation = 'none'
+  void toastProgress.offsetWidth
+  toastProgress.style.animation = `toast-progress-countdown ${toastDeleteTimer}ms linear`
+}
+
+function hideUndoToast() {
+  currentUndoHandler = null
+  toast.classList.add(isHiddenToastClass)
+
+  if (hideToastListener) {
+    toast.removeEventListener('animationend', hideToastListener)
+    hideToastListener = null
+  }
+
+  hideToastListener = (event: AnimationEvent) => {
+    if (event.animationName !== 'toast-out') return
+    if (!toast.classList.contains(isHiddenToastClass)) return
+    if (hideToastListener) {
+      toast.removeEventListener('animationend', hideToastListener)
+      hideToastListener = null
+    }
+    toast.classList.remove(isHiddenToastClass)
+    toastButton.disabled = true
+    dismissToastButton.disabled = true
+    toast.classList.add(isHiddenClass)
+  }
+  toast.addEventListener('animationend', hideToastListener)
+}
+
+function undoDelete(entry: PendingDelete) {
+  const index = pendingDeletes.indexOf(entry)
+  if (index === -1) return
+
+  window.clearTimeout(entry.timerId)
+  pendingDeletes.splice(index, 1)
+
+  todos.push(...entry.todos)
+  categoriesTodos.push(...entry.assignedTodo)
+
+  hideUndoToast()
+  renderTodos()
 }
 
 function createDateElement(el: Todo) {
@@ -438,7 +580,6 @@ function applyCategoryInputColor() {
 
   if (selectedId === emptyValue) {
     todoCategoryInput.style.backgroundColor = emptyValue
-    todoCategoryInput.style.color = emptyValue
     return
   }
   const category = categories.find(
@@ -456,6 +597,7 @@ function applyCategoryInputColor() {
 async function addNewElement() {
   if (isTodoPending) return
   isTodoPending = true
+
   addTodoButton.disabled = true
   todoInput.disabled = true
   dateInput.disabled = true
@@ -511,11 +653,13 @@ async function addNewElement() {
       todos.push(createdTodo)
       renderTodos()
       todoCategoryInput.value = emptyValue
+      todoCategoryInput.style.backgroundColor = emptyValue
       todoInput.value = emptyValue
       dateInput.value = emptyValue
     } else {
       todoErrorMessage.textContent = failedTo.save.todo
     }
+    commitPendingTodos()
   } catch (error) {
     console.error(failedTo.error.addTodo, error)
   } finally {
@@ -535,39 +679,16 @@ function removeElement(element: Todo[] | Category[], id: number) {
 }
 
 async function clearElements(list: 'todos' | 'categories') {
-  const todosList = 'todos'
   const categoriesList = 'categories'
 
-  if (list === todosList) {
-    if (!todosLoaded) {
-      todoErrorMessage.textContent = canNotClear.todos
-      return
-    }
-    if (!categoriesTodosLoaded) {
-      todoErrorMessage.textContent = canNotClear.categoryTodos
-      return
-    }
-  }
   if (list === categoriesList && !categoriesLoaded) {
     categoryErrorMessage.textContent = canNotClear.categories
     return
   }
-  if (list === todosList && todos.length === 0) return
   if (list === categoriesList && categories.length === 0) return
 
   showLoadingSpinner()
   try {
-    if (list === todosList) {
-      const clearTodosCheck = await apiClearTodo()
-
-      if (clearTodosCheck) {
-        todos.splice(0, todos.length)
-        categoriesTodos.splice(0, categoriesTodos.length)
-      } else {
-        todoErrorMessage.textContent = failedTo.clear.todo
-      }
-      renderTodos()
-    }
     if (list === categoriesList) {
       const clearCategoriesCheck = await clearCategories()
       if (clearCategoriesCheck) {
@@ -605,6 +726,13 @@ todoInput.addEventListener('keydown', (e: KeyboardEvent) => {
 })
 
 addTodoButton.addEventListener('click', addNewElement)
+addCategoryButton.addEventListener('click', () => {
+  if (isEditingCategory) {
+    editCategory()
+  } else {
+    addNewCategory()
+  }
+})
 categoryInput.addEventListener('keydown', (e: KeyboardEvent) => {
   if (e.key === keyboardKey.enter) {
     if (isEditingCategory) {
@@ -614,17 +742,26 @@ categoryInput.addEventListener('keydown', (e: KeyboardEvent) => {
     }
   }
 })
-addCategoryButton.addEventListener('click', () => {
-  if (isEditingCategory) {
-    editCategory()
-  } else {
-    addNewCategory()
-  }
-})
 
-deleteAllTodosButton.addEventListener('click', () => {
-  clearElements('todos')
+deleteAllTodosButton.addEventListener('click', async () => {
+  if (todos.length === 0) return
+  await scheduleDelete([...todos], `${todos.length} ${toastDeleteAllText}`)
 })
 deleteAllCategoriesButton.addEventListener('click', () => {
   clearElements('categories')
+})
+
+toastButton.addEventListener('click', () => {
+  if (currentUndoHandler) currentUndoHandler()
+})
+
+dismissToastButton.addEventListener('click', () => {
+  hideUndoToast()
+})
+
+window.addEventListener('beforeunload', (e) => {
+  if (pendingDeletes.length > 0) {
+    e.preventDefault()
+    e.returnValue = ''
+  }
 })
