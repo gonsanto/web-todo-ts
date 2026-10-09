@@ -596,9 +596,6 @@ function applyCategoryInputColor() {
 
 async function addNewElement() {
   if (isTodoPending) return
-
-  commitPendingTodos() //
-
   isTodoPending = true
 
   addTodoButton.disabled = true
@@ -662,6 +659,7 @@ async function addNewElement() {
     } else {
       todoErrorMessage.textContent = failedTo.save.todo
     }
+    commitPendingTodos()
   } catch (error) {
     console.error(failedTo.error.addTodo, error)
   } finally {
@@ -764,5 +762,6 @@ dismissToastButton.addEventListener('click', () => {
 window.addEventListener('beforeunload', (e) => {
   if (pendingDeletes.length > 0) {
     e.preventDefault()
+    e.returnValue = ''
   }
 })
