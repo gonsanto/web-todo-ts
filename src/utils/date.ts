@@ -1,8 +1,13 @@
+import { constants } from './constants'
+import type { Todo } from './types'
+
+const { noDueDateText } = constants
+
 export const getCurrentDate = () => {
   return new Date().toLocaleDateString('en-CA')
 }
 
-export function getDueDateStatus(el: string | null) {
+export const getDueDateStatus = (el: string | null) => {
   if (!el) {
     return 'no-due-date'
   }
@@ -29,4 +34,17 @@ export function getDueDateStatus(el: string | null) {
     }
   }
   return `due-date--${dueDate}`
+}
+
+export const createDateElement = (el: Todo) => {
+  if (!el.due_date) {
+    const noDueDate = document.createElement('p')
+    noDueDate.textContent = noDueDateText
+    return noDueDate
+  }
+
+  const timeEl = document.createElement('time')
+  timeEl.textContent = el.due_date
+
+  return timeEl
 }

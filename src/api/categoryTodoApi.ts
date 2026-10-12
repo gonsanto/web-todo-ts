@@ -1,4 +1,4 @@
-import type { Category_Todo } from './types'
+import type { Category_Todo } from '../utils/types'
 
 const url = 'https://api.todos.in.jt-lab.ch/'
 const jsonApplication = 'application/json'
