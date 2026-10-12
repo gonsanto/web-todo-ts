@@ -1,4 +1,4 @@
-import type { Todo } from './types.ts'
+import type { Todo } from '../utils/types.ts'
 
 const url = 'https://api.todos.in.jt-lab.ch/'
 const jsonApplication = 'application/json'

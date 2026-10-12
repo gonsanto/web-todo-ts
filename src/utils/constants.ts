@@ -1,8 +1,9 @@
 export const constants = {
   emptyValue: '',
+  whitespace: ' ',
   baseCategoryColor: '#ddd',
   baseColorInputValue: '#f9f9f9',
-  baseCategoryTodoBackgroundColor: '',
+  baseCategoryTodoBackgroundColor: 'white',
 
   addButtonText: 'add',
   editButtonText: 'edit',
@@ -13,11 +14,23 @@ export const constants = {
   noDueDateText: 'no due date',
   categoryElText: 'no category',
 
+  toastMessageText: ' deleted',
+  toastDeleteAllText: 'tasks',
+  toastButtonText: '↺',
+  dismissToastButtonText: '✕',
+  hideUndoToastAnimation: 'toast-out',
+  noAnimation: 'none',
+  toastDeleteTimer: 4000,
+
+  allTodos: 'all',
+  singleTodo: 'single',
+
   noAssignedCategoryClass: 'no-category',
   hasAssignedCategoryClass: 'category-todos',
   overdueTaskClass: 'due-date--overdue',
   isHiddenClass: 'hidden',
   isEditingClass: 'editing',
+  isHiddenToastClass: 'hide-toast',
 
   inputErrorClass: 'input--error',
   overdueMessageText: 'Attention: You have overdue tasks that are undone !',
@@ -58,6 +71,8 @@ export const constants = {
     clear: {
       category: 'Failed to clear categories from the server.',
       todo: 'Failed to clear todos from the server.',
+      categoryAndCategoryTodo:
+        'Delete todos assigned to categories before clearing categories from the server.',
     },
     error: {
       assignCategory: 'Todo created, but failed to assign the category',

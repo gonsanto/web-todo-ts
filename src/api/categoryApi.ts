@@ -1,4 +1,4 @@
-import type { Category } from './types'
+import type { Category } from '../utils/types'
 
 const url = 'https://api.todos.in.jt-lab.ch/'
 const jsonApplication = 'application/json'
@@ -76,7 +76,7 @@ export async function deleteApiCategories(id: number): Promise<boolean> {
   }
 }
 
-export async function clearCategories(): Promise<boolean> {
+export async function clearApiCategories(): Promise<boolean> {
   try {
     const response = await fetch(`${url}categories`, {
       method: 'DELETE',

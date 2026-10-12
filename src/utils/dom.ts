@@ -24,4 +24,9 @@ export const elements = {
     '#delete-all-categories',
   ),
   todoCategoryInput: checkNull<HTMLSelectElement>('#todo-category-input'),
+  toast: checkNull<HTMLDivElement>('#toast'),
+  toastMessage: checkNull<HTMLSpanElement>('#toast-message'),
+  toastButton: checkNull<HTMLButtonElement>('#toast-button'),
+  dismissToastButton: checkNull<HTMLButtonElement>('#dismiss-toast-button'),
+  toastProgress: checkNull<HTMLSpanElement>('#toast-progress'),
 } as const
