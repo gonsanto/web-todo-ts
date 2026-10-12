@@ -22,7 +22,7 @@ export const renderTodos = () => {
   updateOverdueTask()
 
   const empty = state.todos.length === 0
-  todoList.classList.toggle(isHiddenClass, empty || !state.todosLoaded)
+  todoList.classList.toggle(isHiddenClass, empty)
   deleteAllTodosButton.classList.toggle(
     isHiddenClass,
     !state.todosLoaded || state.todos.length <= 1,
@@ -35,7 +35,7 @@ export const renderCategories = () => {
   })
 
   const empty = state.categories.length === 0
-  categoryList.classList.toggle(isHiddenClass, empty || !state.categoriesLoaded)
+  categoryList.classList.toggle(isHiddenClass, empty)
   deleteAllCategoriesButton.classList.toggle(
     isHiddenClass,
     !state.categoriesLoaded || state.categories.length <= 1,

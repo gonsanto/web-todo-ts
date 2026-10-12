@@ -206,13 +206,12 @@ renderCategories()
 
 let lastKnownDate = getCurrentDate()
 
-window.addEventListener('focus', () => {
+window.addEventListener('focus', async () => {
   const currentDate = getCurrentDate()
   if (currentDate !== lastKnownDate) {
     lastKnownDate = currentDate
+    renderTodos()
   }
-  renderTodos()
-  renderCategories()
 })
 
 todoCategoryInput.addEventListener('change', () => {

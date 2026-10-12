@@ -61,8 +61,6 @@ export const constants = {
       category: 'Failed to delete category from the server.',
       todo: 'Failed to delete todo from the server.',
       categoryTodo: 'Failed to delete category assigned todo from the server.',
-      categoryAndCategoryTodo:
-        'Delete assigned todo before deleting category from the server.',
     },
     clear: {
       category: 'Failed to clear categories from the server.',

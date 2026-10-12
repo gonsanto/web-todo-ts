@@ -73,12 +73,7 @@ export const addCategory = (el: Category) => {
         renderCategories()
         renderTodos()
       } else {
-        if (state.categoriesTodos.length === 0) {
-          categoryErrorMessage.textContent =
-            failedTo.delete.categoryAndCategoryTodo
-        } else {
-          categoryErrorMessage.textContent = failedTo.delete.category
-        }
+        categoryErrorMessage.textContent = failedTo.delete.category
       }
     } finally {
       hideLoadingSpinner()
@@ -158,12 +153,7 @@ export const clearCategories = async () => {
       state.categoriesTodos.splice(0, state.categoriesTodos.length)
       resetEditedCategory()
     } else {
-      if (state.categoriesTodos.length === 0) {
-        categoryErrorMessage.textContent =
-          failedTo.clear.categoryAndCategoryTodo
-      } else {
-        categoryErrorMessage.textContent = failedTo.clear.category
-      }
+      categoryErrorMessage.textContent = failedTo.clear.category
     }
     renderCategories()
     renderTodos()
