@@ -32,15 +32,15 @@ const {
   categoryErrorMessage,
 } = elements
 
-export const addCategory = (el: Category) => {
-  const category = document.createElement('li')
-  category.id = `categories-elements-${el.id}`
-  category.style.backgroundColor = el.color
-  category.style.borderColor =
-    el.color === baseColorInputValue ? emptyValue : el.color
+export const addCategory = (category: Category) => {
+  const categoryElement = document.createElement('li')
+  categoryElement.id = `categories-elements-${category.id}`
+  categoryElement.style.backgroundColor = category.color
+  categoryElement.style.borderColor =
+    category.color === baseColorInputValue ? emptyValue : category.color
 
   const textSpan = document.createElement('span')
-  textSpan.textContent = el.title
+  textSpan.textContent = category.title
 
   const editButton = document.createElement('button')
   editButton.textContent = editButtonText
@@ -52,11 +52,11 @@ export const addCategory = (el: Category) => {
     categoryList.querySelectorAll('li').forEach((li) => {
       li.classList.remove(isEditingClass)
     })
-    category.classList.add(isEditingClass)
+    categoryElement.classList.add(isEditingClass)
 
-    state.editedCategoryId = el.id
-    categoryInput.value = el.title
-    colorInput.value = el.color
+    state.editedCategoryId = category.id
+    categoryInput.value = category.title
+    colorInput.value = category.color
     addCategoryButton.textContent = saveButtonText
     state.isEditingCategory = true
     categoryInput.focus()
@@ -66,10 +66,10 @@ export const addCategory = (el: Category) => {
     showLoadingSpinner()
 
     try {
-      const removeCheck = await deleteApiCategories(el.id)
+      const removeCheck = await deleteApiCategories(category.id)
       if (removeCheck) {
-        removeElement(state.categories, el.id)
-        if (state.editedCategoryId === el.id) resetEditedCategory()
+        removeElement(state.categories, category.id)
+        if (state.editedCategoryId === category.id) resetEditedCategory()
         renderCategories()
         renderTodos()
       } else {
@@ -80,10 +80,10 @@ export const addCategory = (el: Category) => {
     }
   })
 
-  category.appendChild(textSpan)
-  category.appendChild(editButton)
-  category.appendChild(removeButton)
-  categoryList.appendChild(category)
+  categoryElement.appendChild(textSpan)
+  categoryElement.appendChild(editButton)
+  categoryElement.appendChild(removeButton)
+  categoryList.appendChild(categoryElement)
 }
 
 export const editCategory = async () => {

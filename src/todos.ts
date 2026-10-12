@@ -25,31 +25,31 @@ const {
 } = constants
 const { todoList, todoErrorMessage } = elements
 
-export const addTask = (el: Todo) => {
+export const addTask = (todo: Todo) => {
   const todoElements = document.createElement('li')
-  todoElements.id = `todo-elements-${el.id}`
-  todoElements.classList.add(getDueDateStatus(el.due_date))
+  todoElements.id = `todo-elements-${todo.id}`
+  todoElements.classList.add(getDueDateStatus(todo.due_date))
 
   const checkbox = document.createElement('input')
-  Object.assign(checkbox, { type: 'checkbox', checked: el.done })
+  Object.assign(checkbox, { type: 'checkbox', checked: todo.done })
 
   const textSpan = document.createElement('span')
-  textSpan.textContent = el.title
+  textSpan.textContent = todo.title
 
   const removeButton = document.createElement('button')
   removeButton.textContent = removeButtonText
 
-  const dateEl = createDateElement(el)
-  const categoryEl = applyCategoryElement(el, todoElements)
+  const dateEl = createDateElement(todo)
+  const categoryEl = applyCategoryElement(todo, todoElements)
 
   checkbox.addEventListener('change', async () => {
     const submit = checkbox.checked
     checkbox.disabled = true
     showLoadingSpinner()
     try {
-      const checkboxDone = await apiUpdateTodo(el.id, { done: submit })
+      const checkboxDone = await apiUpdateTodo(todo.id, { done: submit })
       if (checkboxDone) {
-        el.done = submit
+        todo.done = submit
         updateOverdueTask()
       } else if (checkbox.checked === submit) {
         checkbox.checked = !submit
@@ -62,7 +62,7 @@ export const addTask = (el: Todo) => {
   })
 
   removeButton.addEventListener('click', async () => {
-    await scheduleDelete([el], el.title, categoryEl)
+    await scheduleDelete([todo], todo.title, categoryEl)
   })
 
   todoElements.appendChild(checkbox)
@@ -75,8 +75,8 @@ export const addTask = (el: Todo) => {
   todoList.appendChild(todoElements)
 }
 
-export const applyCategoryElement = (el: Todo, todoElements: HTMLElement) => {
-  const link = state.categoriesTodos.find((ct) => ct.todo_id === el.id)
+export const applyCategoryElement = (todo: Todo, todoElements: HTMLElement) => {
+  const link = state.categoriesTodos.find((ct) => ct.todo_id === todo.id)
   const category = link
     ? state.categories.find((c) => c.id === link.category_id)
     : undefined

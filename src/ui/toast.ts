@@ -9,11 +9,16 @@ import { hideLoadingSpinner, showLoadingSpinner } from './updateUi'
 const {
   isHiddenToastClass,
   emptyValue,
+  whitespace,
   toastMessageText,
   isHiddenClass,
   toastDeleteTimer,
   dismissToastButtonText,
+  hideUndoToastAnimation,
+  noAnimation,
   toastButtonText,
+  allTodos,
+  singleTodo,
   failedTo,
 } = constants
 const {
@@ -28,7 +33,7 @@ const {
 dismissToastButton.textContent = dismissToastButtonText
 toastButton.textContent = toastButtonText
 
-let hideToastListener: ((e: AnimationEvent) => void) | null
+let hideUndoToastListener: ((e: AnimationEvent) => void) | null
 let currentUndoHandler: (() => void) | null
 
 export const scheduleDelete = async (
@@ -40,7 +45,7 @@ export const scheduleDelete = async (
   const isBeingDeleted = (id: number) => idsToDelete.includes(id)
 
   const entry: PendingDelete = {
-    type: todosToDelete.length > 1 ? 'all' : 'single',
+    type: todosToDelete.length > 1 ? allTodos : singleTodo,
     todos: todosToDelete,
     assignedTodo: state.categoriesTodos.filter((ct) =>
       isBeingDeleted(ct.todo_id),
@@ -70,7 +75,7 @@ export const scheduleDelete = async (
 export const commitDelete = async (entry: PendingDelete) => {
   showLoadingSpinner()
   try {
-    if (entry.type === 'all') {
+    if (entry.type === allTodos) {
       const ok = await apiClearTodo()
       if (!ok) {
         state.todos.push(...entry.todos)
@@ -107,7 +112,7 @@ export const commitPendingTodos = () => {
 
 export const undoDelete = (entry: PendingDelete) => {
   const index = state.pendingDeletes.indexOf(entry)
-  if (index === -1) return
+  if (index === -1) return // -1 means not found
 
   window.clearTimeout(entry.timerId)
   state.pendingDeletes.splice(index, 1)
@@ -124,15 +129,15 @@ export const showUndoToast = (
   onUndo: () => void,
   categoryEl?: HTMLElement,
 ) => {
-  if (hideToastListener) {
-    toast.removeEventListener('animationend', hideToastListener)
-    hideToastListener = null
+  if (hideUndoToastListener) {
+    toast.removeEventListener('animationend', hideUndoToastListener)
+    hideUndoToastListener = null
   }
   toast.classList.remove(isHiddenToastClass)
   toastMessage.textContent = emptyValue
 
   if (categoryEl) {
-    toastMessage.append(categoryEl.cloneNode(true), ' ')
+    toastMessage.append(categoryEl.cloneNode(true), whitespace)
   }
   toastMessage.append(toastLabel, toastMessageText)
 
@@ -141,7 +146,7 @@ export const showUndoToast = (
   dismissToastButton.disabled = false
   toast.classList.remove(isHiddenClass)
 
-  toastProgress.style.animation = 'none'
+  toastProgress.style.animation = noAnimation
   toastProgress.offsetWidth
   toastProgress.style.animation = `toast-progress-countdown ${toastDeleteTimer}ms linear`
 }
@@ -150,24 +155,24 @@ export const hideUndoToast = () => {
   currentUndoHandler = null
   toast.classList.add(isHiddenToastClass)
 
-  if (hideToastListener) {
-    toast.removeEventListener('animationend', hideToastListener)
-    hideToastListener = null
+  if (hideUndoToastListener) {
+    toast.removeEventListener('animationend', hideUndoToastListener)
+    hideUndoToastListener = null
   }
 
-  hideToastListener = (event: AnimationEvent) => {
-    if (event.animationName !== 'toast-out') return
+  hideUndoToastListener = (event: AnimationEvent) => {
+    if (event.animationName !== hideUndoToastAnimation) return
     if (!toast.classList.contains(isHiddenToastClass)) return
-    if (hideToastListener) {
-      toast.removeEventListener('animationend', hideToastListener)
-      hideToastListener = null
+    if (hideUndoToastListener) {
+      toast.removeEventListener('animationend', hideUndoToastListener)
+      hideUndoToastListener = null
     }
     toast.classList.remove(isHiddenToastClass)
     toastButton.disabled = true
     dismissToastButton.disabled = true
     toast.classList.add(isHiddenClass)
   }
-  toast.addEventListener('animationend', hideToastListener)
+  toast.addEventListener('animationend', hideUndoToastListener)
 }
 
 toastButton.addEventListener('click', () => {

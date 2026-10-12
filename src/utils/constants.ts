@@ -1,5 +1,6 @@
 export const constants = {
   emptyValue: '',
+  whitespace: ' ',
   baseCategoryColor: '#ddd',
   baseColorInputValue: '#f9f9f9',
   baseCategoryTodoBackgroundColor: 'white',
@@ -17,7 +18,12 @@ export const constants = {
   toastDeleteAllText: 'tasks',
   toastButtonText: '↺',
   dismissToastButtonText: '✕',
+  hideUndoToastAnimation: 'toast-out',
+  noAnimation: 'none',
   toastDeleteTimer: 4000,
+
+  allTodos: 'all',
+  singleTodo: 'single',
 
   noAssignedCategoryClass: 'no-category',
   hasAssignedCategoryClass: 'category-todos',
