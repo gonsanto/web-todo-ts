@@ -4,8 +4,8 @@ This project is a to-do list app, coded in [Typescript](https://www.typescriptla
 
 ## Features
 
-- Create, edit, and delete tasks
-- Set an optional due date; Tasks are color-coded by urgency (today, soon, overdue, later)
+- Create, mark completed, and delete tasks
+- Set an optional due date; tasks are color-coded by urgency (today, soon, overdue, later)
 - Create, edit, and delete categories with a custom color
 - Assign one category per task when creating a new task
 - Delete a task or all tasks with a 4-second undo window
@@ -14,28 +14,25 @@ This project is a to-do list app, coded in [Typescript](https://www.typescriptla
 
 ## Code organization
 
-- `/api` — connection between the REST API and the app.
+- `src/api` — connection between the REST API and the app.
 
-- `/ui` — low-impact UI rendres, mainly updates.
+- `src/ui` — low-impact UI rendres, mainly updates.
 
-- `/utils` — reusable helpers and constants used across the app.
+- `src/utils` — reusable helpers and constants used across the app.
 
 
 ## Setup
 
-Requires [Node.js](https://nodejs.org/) (see `engines` in package.json) and [pnpm](https://pnpm.io/).
+Requires [Node.js](https://nodejs.org/) and [pnpm](https://pnpm.io/).
 
-```
 - Install dependencies: `pnpm install`
 - Start the dev server: `pnpm dev`
 - Open [localhost:5173](http://localhost:5173/)
-```
 
 ## Before committing
 
-```
 - Use `pnpm check-types` to launch the type checker. This will verify the project's type correctness.
 - Use `pnpm format` to format all project files correctly.
 - Use `pnpm lint` to run the Biome linter
-```
+  
 These commands allow you to create good quality commits. Don't forget to lint and format before your commits.
